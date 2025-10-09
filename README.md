@@ -214,9 +214,6 @@ echo $user->address->city; // Amsterdam
 
 ### Example: Arrays of Objects with a PSR-11 Container
 
-```php
-## Example: Arrays of Objects with a PSR-11 Container
-
 `Struct` can also hydrate arrays of nested objects.  
 If the class is registered in the container, it will be resolved from there; otherwise, it will be created via `new`.
 
