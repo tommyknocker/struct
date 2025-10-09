@@ -3,6 +3,12 @@
   "description": "PHP Structure helper with typed properties and attributes",
   "type": "library",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Vasiliy Krivoplyas",
+      "email": "vasiliy@krivoplyas.com"
+    }
+  ],
   "require": {
     "php": "^8.1",
     "psr/container": "^2.0"
