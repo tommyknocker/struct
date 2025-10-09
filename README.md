@@ -18,7 +18,7 @@ more expressive, and ready for modern PHP.
 * Type validation at runtime (scalars, objects, arrays, enums)
 * Nullable fields support
 * readonly properties for immutability
-* Implements ArrayAccess and JsonSerializable
+* Implements `ArrayAccess` and `JsonSerializable`
 * PSR‑11 container integration (single object + arrays of objects)
 * PHPUnit test coverage
 
@@ -282,20 +282,6 @@ $user = new UserWithHistory([
 echo $user->previousAddresses[0]->city; // Berlin
 echo $user->previousAddresses[1]->street; // Champs-Élysées
 ```
-
----
-
-## Features
-
-Attribute‑based field definitions
-
-* Type validation at runtime
-* Nullable fields support
-* readonly properties for immutability
-* Implements `ArrayAccess` and `JsonSerializable`
-* PHPUnit test coverage
-
----
 
 ## Testing
 
