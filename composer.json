@@ -3,6 +3,18 @@
   "description": "PHP Structure helper with typed properties and attributes",
   "type": "library",
   "license": "MIT",
+  "keywords": [
+    "struct",
+    "struct-helper",
+    "data-structure",
+    "schema",
+    "validation",
+    "typed properties",
+    "attributes",
+    "type-casting",
+    "data-validation",
+    "template-driven"
+  ],
   "authors": [
     {
       "name": "Vasiliy Krivoplyas",
