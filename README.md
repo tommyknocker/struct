@@ -1,30 +1,75 @@
 # Struct
 
-A lightweight structure helper for PHP 8.1+.  
+[![CI](https://github.com/tommyknocker/struct/workflows/CI/badge.svg)](https://github.com/tommyknocker/struct/actions)
+[![PHPStan Level 9](https://img.shields.io/badge/PHPStan-level%209-brightgreen.svg)](https://phpstan.org/)
+[![PHP Version](https://img.shields.io/badge/PHP-8.1%2B-blue.svg)](https://www.php.net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A lightweight, type-safe structure helper for PHP 8.1+.  
 Define your data models with attributes, get automatic validation, array access, and JSON serialization.
 
 ---
 
-## Why Struct?
+## 🚀 Why Struct?
 
-Instead of manually validating arrays, you can define a strict data model with attributes. This makes your code safer, 
-more expressive, and ready for modern PHP.
+Instead of manually validating arrays, you can define a strict data model with attributes. This makes your code:
+- ✅ **Type-safe** with runtime validation
+- 🔒 **Immutable** with readonly properties
+- 📦 **Serializable** with built-in JSON support
+- 🎯 **Simple** with minimal boilerplate
 
 ---
 
-## Features
+## 📦 Installation
 
-* Attribute‑based field definitions
-* Type validation at runtime (scalars, objects, arrays, enums)
-* Nullable fields support
-* readonly properties for immutability
-* Implements `ArrayAccess` and `JsonSerializable`
-* PSR‑11 container integration (single object + arrays of objects)
-* PHPUnit test coverage
+Install via Composer:
 
-## Examples
+```bash
+composer require tommyknocker/struct
+```
 
-### Example: scalars
+**Requirements:**
+- PHP 8.1 or higher
+- Composer
+
+---
+
+## ✨ Features
+
+* 🏷️ **Attribute-based field definitions** – Clean and declarative syntax
+* ✅ **Type validation** – Scalars, objects, arrays, enums, DateTime
+* 🔒 **Immutability** – readonly properties by design
+* 🌐 **JSON support** – `toJson()`, `fromJson()`, `JsonSerializable`
+* 🔄 **Array conversion** – `toArray()` with recursive support
+* 📝 **Default values** – Optional fields with defaults
+* 🔑 **Field aliases** – Map different key names
+* ✔️ **Custom validators** – Add your own validation logic
+* 🎭 **Mixed type support** – Handle dynamic data
+* ⏰ **DateTime parsing** – Automatic string to DateTime conversion
+* 🔁 **Cloning with modifications** – `with()` method
+* 📊 **ArrayAccess** – Array-like read access
+* 🧰 **PSR-11 container integration** – DI support
+* 🔍 **PHPStan Level 9** – Maximum static analysis
+* 🧪 **100% tested** – PHPUnit coverage
+* ⚡ **Performance optimized** – Reflection caching
+
+## 🎯 Use Cases
+
+Perfect for:
+- 📱 **REST API validation** for mobile apps
+- 🔄 **Data Transfer Objects (DTOs)** in clean architecture
+- 🌐 **Third-party API integration** with field mapping
+- ✅ **Form validation** with complex rules
+- 📊 **Data serialization/deserialization**
+- 🛡️ **Type-safe data handling** in microservices
+
+👉 **[See practical examples](examples/)** for mobile app REST API scenarios
+
+---
+
+## 📚 Examples
+
+### Basic Usage: Scalars
 
 ```php
 use tommyknocker\struct\Struct;
@@ -57,9 +102,10 @@ $hit = new Hit([
 ]);
 
 echo $hit->date; // 2025-10-09
+echo $hit['ip']; // 127.0.0.1 (ArrayAccess support)
 ```
 
-### Example: nullable fields
+### Nullable Fields
 
 ```php
 final class Person extends Struct
@@ -74,7 +120,100 @@ final class Person extends Struct
 $person = new Person(['name' => 'Alice', 'age' => null]);
 ```
 
-### Example: Nested objects
+### Default Values
+
+```php
+final class Config extends Struct
+{
+    #[Field('string', default: 'localhost')]
+    public readonly string $host;
+
+    #[Field('int', default: 3306)]
+    public readonly int $port;
+}
+
+// Both fields use defaults
+$config = new Config([]);
+echo $config->host; // localhost
+echo $config->port; // 3306
+```
+
+### Field Aliases
+
+```php
+final class User extends Struct
+{
+    #[Field('string', alias: 'user_name')]
+    public readonly string $name;
+
+    #[Field('string', alias: 'email_address')]
+    public readonly string $email;
+}
+
+// Use API keys as they come
+$user = new User([
+    'user_name' => 'John',
+    'email_address' => 'john@example.com'
+]);
+```
+
+### Custom Validation
+
+```php
+class EmailValidator
+{
+    public static function validate(mixed $value): bool|string
+    {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            return "Invalid email format";
+        }
+        return true;
+    }
+}
+
+final class Contact extends Struct
+{
+    #[Field('string', validator: EmailValidator::class)]
+    public readonly string $email;
+}
+
+$contact = new Contact(['email' => 'test@example.com']); // ✅ OK
+// new Contact(['email' => 'invalid']); // ❌ Throws RuntimeException
+```
+
+### DateTime Support
+
+```php
+final class Event extends Struct
+{
+    #[Field('string')]
+    public readonly string $name;
+
+    #[Field(\DateTimeImmutable::class)]
+    public readonly \DateTimeImmutable $date;
+}
+
+// Accepts string or DateTime
+$event = new Event([
+    'name' => 'Conference',
+    'date' => '2025-12-31 10:00:00'
+]);
+```
+
+### Mixed Type Support
+
+```php
+final class Payload extends Struct
+{
+    #[Field('string')]
+    public readonly string $type;
+
+    #[Field('mixed')]
+    public readonly mixed $data; // Can be anything
+}
+```
+
+### Nested Objects
 
 ```php
 final class Address extends Struct
@@ -97,11 +236,11 @@ final class User extends Struct
 
 $user = new User([
     'name' => 'Bob',
-    'address' => new Address(['city' => 'Berlin', 'street' => 'Unter den Linden']),
+    'address' => ['city' => 'Berlin', 'street' => 'Unter den Linden'],
 ]);
 ```
 
-### Example: Arrays of objects
+### Arrays of Objects
 
 ```php
 final class UserWithHistory extends Struct
@@ -116,14 +255,13 @@ final class UserWithHistory extends Struct
 $user = new UserWithHistory([
     'name' => 'Charlie',
     'previousAddresses' => [
-        new Address(['city' => 'Paris', 'street' => 'Champs-Élysées']),
-        new Address(['city' => 'Rome', 'street' => 'Via del Corso']),
+        ['city' => 'Paris', 'street' => 'Champs-Élysées'],
+        ['city' => 'Rome', 'street' => 'Via del Corso'],
     ],
 ]);
-
 ```
 
-### Example: Enums
+### Enums
 
 ```php
 enum UserType: string
@@ -148,53 +286,38 @@ $account = new Account([
 ]);
 ```
 
-### Example: Using a PSR-11 Container
+### JSON Serialization
 
-`Struct` can optionally use a PSR-11 container to resolve nested objects.  
-If a class is registered in the container, it will be retrieved from there; otherwise, it will be created via `new`.
+```php
+$user = new User(['name' => 'Alice', 'address' => ['city' => 'Berlin', 'street' => 'Main St']]);
+
+// To JSON
+$json = $user->toJson(pretty: true);
+
+// From JSON
+$restored = User::fromJson($json);
+
+// To Array
+$array = $user->toArray(); // Recursive for nested structs
+```
+
+### Cloning with Modifications
+
+```php
+$user = new User(['name' => 'Alice', 'age' => 30]);
+
+// Create modified copy
+$updated = $user->with(['age' => 31]);
+
+echo $user->age;    // 30 (original unchanged)
+echo $updated->age; // 31 (new instance)
+```
+
+### PSR-11 Container Integration
 
 ```php
 use Psr\Container\ContainerInterface;
-use Tommyknocker\Struct\Struct;
-use Tommyknocker\Struct\Field;
-
-final class SimpleContainer implements ContainerInterface
-{
-    private array $services = [];
-
-    public function set(string $id, mixed $service): void
-    {
-        $this->services[$id] = $service;
-    }
-
-    public function get(string $id): mixed
-    {
-        return $this->services[$id];
-    }
-
-    public function has(string $id): bool
-    {
-        return isset($this->services[$id]);
-    }
-}
-
-final class Address extends Struct
-{
-    #[Field('string')]
-    public readonly string $city;
-
-    #[Field('string')]
-    public readonly string $street;
-}
-
-final class User extends Struct
-{
-    #[Field('string')]
-    public readonly string $name;
-
-    #[Field(Address::class)]
-    public readonly Address $address;
-}
+use tommyknocker\struct\Struct;
 
 // Setup container
 $container = new SimpleContainer();
@@ -203,89 +326,144 @@ Struct::$container = $container;
 // Register Address
 $container->set(Address::class, new Address(['city' => 'Amsterdam', 'street' => 'Damrak']));
 
-// Create User
+// Create User - Address will be resolved from container
 $user = new User([
     'name' => 'Alice',
     'address' => ['city' => 'Amsterdam', 'street' => 'Damrak'],
 ]);
-
-echo $user->address->city; // Amsterdam
 ```
 
-### Example: Arrays of Objects with a PSR-11 Container
+---
 
-`Struct` can also hydrate arrays of nested objects.  
-If the class is registered in the container, it will be resolved from there; otherwise, it will be created via `new`.
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+Run PHPStan static analysis:
+
+```bash
+composer phpstan
+```
+
+Check code style:
+
+```bash
+composer cs-check
+```
+
+Run all checks:
+
+```bash
+composer check
+```
+
+---
+
+## 🛠️ Development
+
+### Code Style
+
+This project uses PHP-CS-Fixer with PSR-12 standard:
+
+```bash
+composer cs-fix
+```
+
+### Static Analysis
+
+PHPStan is configured at level 9 for maximum type safety:
+
+```bash
+composer phpstan
+```
+
+---
+
+## 📝 API Reference
+
+### Field Attribute
 
 ```php
-use Psr\Container\ContainerInterface;
-use Tommyknocker\Struct\Struct;
-use Tommyknocker\Struct\Field;
-
-final class SimpleContainer implements ContainerInterface
-{
-    private array $services = [];
-
-    public function set(string $id, mixed $service): void
-    {
-        $this->services[$id] = $service;
-    }
-
-    public function get(string $id): mixed
-    {
-        return $this->services[$id];
-    }
-
-    public function has(string $id): bool
-    {
-        return isset($this->services[$id]);
-    }
-}
-
-final class Address extends Struct
-{
-    #[Field('string')]
-    public readonly string $city;
-
-    #[Field('string')]
-    public readonly string $street;
-}
-
-final class UserWithHistory extends Struct
-{
-    #[Field('string')]
-    public readonly string $name;
-
-    #[Field(Address::class, isArray: true)]
-    public readonly array $previousAddresses;
-}
-
-// Setup container
-$container = new SimpleContainer();
-Struct::$container = $container;
-
-// Register Address in container
-$container->set(Address::class, new Address(['city' => 'Berlin', 'street' => 'Unter den Linden']));
-
-// Create User with array of addresses
-$user = new UserWithHistory([
-    'name' => 'Alice',
-    'previousAddresses' => [
-        ['city' => 'Berlin', 'street' => 'Unter den Linden'],
-        ['city' => 'Paris', 'street' => 'Champs-Élysées'],
-    ],
-]);
-
-echo $user->previousAddresses[0]->city; // Berlin
-echo $user->previousAddresses[1]->street; // Champs-Élysées
+#[Field(
+    type: string,              // Type: 'string', 'int', 'float', 'bool', 'mixed', or class-string
+    nullable: bool = false,    // Allow null values
+    isArray: bool = false,     // Field is array of type
+    default: mixed = null,     // Default value if not provided
+    alias: ?string = null,     // Alternative key name in input data
+    validator: ?string = null  // Validator class with static validate() method
+)]
 ```
 
-## Testing
+### Struct Methods
 
-```bash
-./vendor/bin/phpunit --bootstrap vendor/autoload.php tests
+```php
+// Constructor
+public function __construct(array $data)
+
+// Array conversion (recursive)
+public function toArray(): array
+
+// JSON serialization
+public function toJson(bool $pretty = false, int $flags = ...): string
+
+// Create from JSON
+public static function fromJson(string $json, int $flags = JSON_THROW_ON_ERROR): static
+
+// Clone with modifications
+public function with(array $changes): static
+
+// ArrayAccess (read-only)
+public function offsetExists(mixed $offset): bool
+public function offsetGet(mixed $offset): mixed
+
+// JsonSerializable
+public function jsonSerialize(): mixed
 ```
-or
-```bash
-composer run-script test
-```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests and checks (`composer check`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Inspired by modern typed data structures in other languages
+- Built with modern PHP 8.1+ features
+- Tested with PHPUnit 11
+- Analyzed with PHPStan Level 9
+
+---
+
+## 📧 Author
+
+**Vasiliy Krivoplyas**  
+Email: vasiliy@krivoplyas.com
+
+---
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/tommyknocker/struct)
+- [Packagist Package](https://packagist.org/packages/tommyknocker/struct)
+- [Issue Tracker](https://github.com/tommyknocker/struct/issues)

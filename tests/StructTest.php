@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace tommyknocker\struct\tests;
 
 use PHPUnit\Framework\TestCase;
-use tommyknocker\struct\tests\fixtures\DummyStruct;
 use RuntimeException;
+use tommyknocker\struct\tests\fixtures\DummyStruct;
 
 final class StructTest extends TestCase
 {
@@ -42,7 +43,7 @@ final class StructTest extends TestCase
 
     public function testArrayAccess(): void
     {
-        $struct= new DummyStruct(['name' => 'Alice', 'age' => 25, 'isMarried' => true]);
+        $struct = new DummyStruct(['name' => 'Alice', 'age' => 25, 'isMarried' => true]);
         $this->assertTrue(isset($struct['name']));
         $this->assertSame('Alice', $struct['name']);
         $this->assertTrue(isset($struct['age']));

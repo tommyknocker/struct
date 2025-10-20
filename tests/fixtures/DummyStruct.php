@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace tommyknocker\struct\tests\fixtures;
 
-use tommyknocker\struct\Struct;
 use tommyknocker\struct\Field;
+use tommyknocker\struct\Struct;
 
 final class DummyStruct extends Struct
 {
