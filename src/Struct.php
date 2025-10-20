@@ -176,8 +176,8 @@ abstract class Struct implements ArrayAccess, JsonSerializable
 
             // Try to convert from string/int for backed enums
             if (is_string($value) || is_int($value)) {
-                $reflectionEnum = new \ReflectionEnum($expected);
-                if ($reflectionEnum->isBacked()) {
+                // Check if it's a backed enum by checking if it implements BackedEnum
+                if (is_subclass_of($expected, \BackedEnum::class)) {
                     try {
                         // @phpstan-ignore-next-line - BackedEnum has from() method
                         return $expected::from($value);
