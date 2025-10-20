@@ -1,12 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace tommyknocker\struct\tests;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use tommyknocker\struct\struct;
-use tommyknocker\struct\field;
+use tommyknocker\struct\Struct;
 use tommyknocker\struct\tests\fixtures\Address;
 use tommyknocker\struct\tests\fixtures\User;
 
@@ -15,7 +15,8 @@ final class StructContainerTest extends TestCase
     public function testUsesContainerForObjectCreation(): void
     {
         // Simple container mock
-        $container = new class implements ContainerInterface {
+        $container = new class () implements ContainerInterface {
+            /** @var array<string, mixed> */
             private array $services = [];
 
             public function set(string $id, mixed $service): void
@@ -45,7 +46,7 @@ final class StructContainerTest extends TestCase
             'previousAddresses' => [
                 ['city' => 'Amsterdam', 'street' => 'Keizersgracht 317, 1016 EE'],
                 ['city' => 'Paris', 'street' => '12 Rue de Rivoli, 75004'],
-            ]
+            ],
         ]);
 
         $this->assertInstanceOf(Address::class, $user->address);

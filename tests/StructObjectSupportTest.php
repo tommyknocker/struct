@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace tommyknocker\struct\tests;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use tommyknocker\struct\tests\fixtures\Address;
 use tommyknocker\struct\tests\fixtures\User;
-use RuntimeException;
 
 final class StructObjectSupportTest extends TestCase
 {
