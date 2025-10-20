@@ -19,6 +19,12 @@ abstract class Struct implements ArrayAccess, JsonSerializable
     public static ?ContainerInterface $container = null;
 
     /**
+     * Enable strict mode to throw exception on unknown fields
+     * @var bool
+     */
+    public static bool $strictMode = false;
+
+    /**
      * Cache for reflection data to improve performance
      * @var array<string, array<ReflectionProperty>>
      */
@@ -40,6 +46,45 @@ abstract class Struct implements ArrayAccess, JsonSerializable
 
         foreach (self::$reflectionCache[$className] as $property) {
             $this->assignProperty($property, $data);
+        }
+
+        // Check for unknown fields in strict mode
+        if (self::$strictMode) {
+            $this->validateNoExtraFields($data);
+        }
+    }
+
+    /**
+     * Validate that no extra fields are present in data
+     * @param array<string, mixed> $data
+     * @return void
+     */
+    protected function validateNoExtraFields(array $data): void
+    {
+        $className = static::class;
+        $allowedFields = [];
+
+        foreach (self::$reflectionCache[$className] as $property) {
+            $attributes = $property->getAttributes(Field::class);
+            if (empty($attributes)) {
+                continue;
+            }
+
+            /** @var Field $field */
+            $field = $attributes[0]->newInstance();
+            $name = $property->getName();
+
+            // Both property name and alias are allowed
+            $allowedFields[$name] = true;
+            if ($field->alias) {
+                $allowedFields[$field->alias] = true;
+            }
+        }
+
+        foreach (array_keys($data) as $key) {
+            if (!isset($allowedFields[$key])) {
+                throw new RuntimeException("Unknown field: $key");
+            }
         }
     }
 

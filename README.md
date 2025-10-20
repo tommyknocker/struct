@@ -313,6 +313,40 @@ echo $user->age;    // 30 (original unchanged)
 echo $updated->age; // 31 (new instance)
 ```
 
+### Strict Mode (Validate No Extra Fields)
+
+```php
+use tommyknocker\struct\Struct;
+
+// Enable strict mode globally
+Struct::$strictMode = true;
+
+final class ApiRequest extends Struct
+{
+    #[Field('string')]
+    public readonly string $username;
+
+    #[Field('string')]
+    public readonly string $email;
+}
+
+// ✅ Valid - all fields are known
+$request = new ApiRequest([
+    'username' => 'john',
+    'email' => 'john@example.com',
+]);
+
+// ❌ Throws RuntimeException: Unknown field: extra_field
+$request = new ApiRequest([
+    'username' => 'john',
+    'email' => 'john@example.com',
+    'extra_field' => 'not allowed!',
+]);
+
+// Disable strict mode (default behavior - extra fields ignored)
+Struct::$strictMode = false;
+```
+
 ### PSR-11 Container Integration
 
 ```php
