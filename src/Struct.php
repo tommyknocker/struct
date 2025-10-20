@@ -179,7 +179,6 @@ abstract class Struct implements ArrayAccess, JsonSerializable
                 // Check if it's a backed enum by checking if it implements BackedEnum
                 if (is_subclass_of($expected, \BackedEnum::class)) {
                     try {
-                        // @phpstan-ignore-next-line - BackedEnum has from() method
                         return $expected::from($value);
                     } catch (\ValueError $e) {
                         throw new RuntimeException("Invalid value '$value' for enum $expected");
