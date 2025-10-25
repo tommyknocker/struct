@@ -13,7 +13,28 @@
     "attributes",
     "type-casting",
     "data-validation",
-    "template-driven"
+    "template-driven",
+    "dto",
+    "data-transfer-object",
+    "immutable",
+    "readonly",
+    "json-serialization",
+    "array-access",
+    "php8",
+    "php81",
+    "reflection",
+    "metadata",
+    "factory-pattern",
+    "psr-11",
+    "dependency-injection",
+    "api-validation",
+    "form-validation",
+    "serialization",
+    "deserialization",
+    "type-safe",
+    "runtime-validation",
+    "static-analysis",
+    "phpstan"
   ],
   "authors": [
     {
@@ -42,13 +63,39 @@
   },
   "scripts": {
     "test": "./vendor/bin/phpunit",
+    "test-examples": "./scripts/test-examples.sh",
+    "test-coverage": "./vendor/bin/phpunit --coverage-html coverage",
     "phpstan": "./vendor/bin/phpstan analyse",
+    "phpstan-baseline": "./vendor/bin/phpstan analyse --generate-baseline",
     "cs-fix": "./vendor/bin/php-cs-fixer fix",
     "cs-check": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
-    "check": [
+    "cs-config": "./vendor/bin/php-cs-fixer config:dump",
+    "quality": [
       "@cs-check",
       "@phpstan",
       "@test"
+    ],
+    "quality-fix": [
+      "@cs-fix",
+      "@test"
+    ],
+    "check": [
+      "@cs-check",
+      "@phpstan",
+      "@test",
+      "@test-examples"
+    ],
+    "ci": [
+      "@cs-check",
+      "@phpstan",
+      "@test",
+      "@test-examples"
+    ],
+    "post-install-cmd": [
+      "@test-examples"
+    ],
+    "post-update-cmd": [
+      "@test-examples"
     ]
   }
 }

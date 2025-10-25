@@ -1,9 +1,21 @@
-/vendor/
-composer.lock
-.phpunit.cache
-.phpunit.coverage
-.php-cs-fixer.cache
-.phpstan.cache
-.idea/
+# Coverage reports
+coverage/
+
+# IDE files
 .vscode/
-*.log
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Composer
+vendor/
+
+# PHP CS Fixer cache
+.php-cs-fixer.cache
+
+# PHPStan cache
+.phpstan.cache

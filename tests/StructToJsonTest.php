@@ -62,4 +62,57 @@ final class StructToJsonTest extends TestCase
         $this->assertStringContainsString('40', $json);
         $this->assertStringContainsString('"isMarried": false', $json);
     }
+
+    public function testToJsonWithNullValues(): void
+    {
+        $s = new DummyStruct(['name' => 'Test', 'age' => null, 'isMarried' => false]);
+
+        $json = $s->toJson();
+
+        $this->assertJson($json);
+        $this->assertStringContainsString('"age":null', $json);
+        $this->assertStringContainsString('"isMarried":false', $json);
+    }
+
+    public function testToJsonWithSpecialCharacters(): void
+    {
+        $s = new DummyStruct(['name' => 'Test "quoted" & <tagged>', 'age' => 25, 'isMarried' => true]);
+
+        $json = $s->toJson();
+
+        $this->assertJson($json);
+        $this->assertStringContainsString('Test \"quoted\" & <tagged>', $json);
+    }
+
+    public function testToJsonWithUnicodeCharacters(): void
+    {
+        $s = new DummyStruct(['name' => 'Тест 测试 🚀', 'age' => 25, 'isMarried' => false]);
+
+        $json = $s->toJson();
+
+        $this->assertJson($json);
+        $this->assertStringContainsString('Тест 测试 🚀', $json);
+    }
+
+    public function testToJsonWithEmptyString(): void
+    {
+        $s = new DummyStruct(['name' => '', 'age' => 0, 'isMarried' => false]);
+
+        $json = $s->toJson();
+
+        $this->assertJson($json);
+        $this->assertStringContainsString('"name":""', $json);
+        $this->assertStringContainsString('"age":0', $json);
+    }
+
+    public function testToJsonWithZeroValues(): void
+    {
+        $s = new DummyStruct(['name' => 'Zero', 'age' => 0, 'isMarried' => false]);
+
+        $json = $s->toJson();
+
+        $this->assertJson($json);
+        $this->assertStringContainsString('"age":0', $json);
+        $this->assertStringContainsString('"isMarried":false', $json);
+    }
 }

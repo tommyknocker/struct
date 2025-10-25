@@ -8,66 +8,10 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use tommyknocker\struct\Field;
 use tommyknocker\struct\Struct;
-
-class EmailValidator
-{
-    public static function validate(mixed $value): bool|string
-    {
-        if (!is_string($value)) {
-            return "Email must be a string";
-        }
-
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return "Invalid email format";
-        }
-
-        return true;
-    }
-}
-
-class RangeValidator
-{
-    public static function validate(mixed $value): bool|string
-    {
-        if (!is_int($value)) {
-            return "Value must be an integer";
-        }
-
-        if ($value < 1 || $value > 100) {
-            return "Value must be between 1 and 100";
-        }
-
-        return true;
-    }
-}
-
-class AlwaysFailValidator
-{
-    public static function validate(mixed $value): bool|string
-    {
-        return "Always fails";
-    }
-}
-
-class NoValidateMethodValidator
-{
-    public static function check(mixed $value): bool
-    {
-        return true;
-    }
-}
-
-final class ValidatedUser extends Struct
-{
-    #[Field('string')]
-    public readonly string $username;
-
-    #[Field('string', validator: EmailValidator::class)]
-    public readonly string $email;
-
-    #[Field('int', validator: RangeValidator::class)]
-    public readonly int $score;
-}
+use tommyknocker\struct\tests\fixtures\AlwaysFailValidator;
+use tommyknocker\struct\tests\fixtures\EmailValidator;
+use tommyknocker\struct\tests\fixtures\NoValidateMethodValidator;
+use tommyknocker\struct\tests\fixtures\ValidatedUser;
 
 final class StructValidatorTest extends TestCase
 {
@@ -132,7 +76,7 @@ final class StructValidatorTest extends TestCase
 
     public function testValidatorFailsInArray(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(\tommyknocker\struct\exception\ValidationException::class);
         $this->expectExceptionMessage('Invalid email format');
 
         new class (['emails' => ['john@example.com', 'invalid']]) extends Struct {

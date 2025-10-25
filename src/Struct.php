@@ -5,30 +5,52 @@ declare(strict_types=1);
 namespace tommyknocker\struct;
 
 use ArrayAccess;
+use BackedEnum;
+use DateTimeImmutable;
+use DateTimeInterface;
+use Exception;
 use JsonSerializable;
 use Psr\Container\ContainerInterface;
-use ReflectionClass;
 use ReflectionProperty;
 use RuntimeException;
+use tommyknocker\struct\cache\ReflectionCache;
+use tommyknocker\struct\exception\FieldNotFoundException;
+use tommyknocker\struct\exception\ValidationException;
+use tommyknocker\struct\metadata\MetadataFactory;
+use tommyknocker\struct\transformation\TransformerInterface;
+use tommyknocker\struct\validation\FieldValidator;
+use ValueError;
 
 /**
  * @implements ArrayAccess<string, mixed>
  */
 abstract class Struct implements ArrayAccess, JsonSerializable
 {
+    /**
+     * Optional PSR-11 container for dependency injection
+     * @var ?ContainerInterface
+     */
     public static ?ContainerInterface $container = null;
-
     /**
      * Enable strict mode to throw exception on unknown fields
      * @var bool
      */
     public static bool $strictMode = false;
-
     /**
      * Cache for reflection data to improve performance
      * @var array<string, array<ReflectionProperty>>
      */
-    private static array $reflectionCache = [];
+    protected static array $reflectionCache = [];
+    /**
+     * Shared field validator instance
+     * @var ?FieldValidator
+     */
+    protected static ?FieldValidator $fieldValidator = null;
+    /**
+     * Shared metadata factory instance
+     * @var ?MetadataFactory
+     */
+    protected static ?MetadataFactory $metadataFactory = null;
 
     /**
      * Construct a new struct
@@ -39,12 +61,17 @@ abstract class Struct implements ArrayAccess, JsonSerializable
     {
         $className = static::class;
 
-        if (!isset(self::$reflectionCache[$className])) {
-            $ref = new ReflectionClass($this);
-            self::$reflectionCache[$className] = $ref->getProperties();
+        // Initialize services if not already done
+        if (self::$fieldValidator === null) {
+            self::$fieldValidator = new FieldValidator();
+        }
+        if (self::$metadataFactory === null) {
+            self::$metadataFactory = new MetadataFactory();
         }
 
-        foreach (self::$reflectionCache[$className] as $property) {
+        $properties = ReflectionCache::getProperties($className);
+
+        foreach ($properties as $property) {
             $this->assignProperty($property, $data);
         }
 
@@ -61,28 +88,14 @@ abstract class Struct implements ArrayAccess, JsonSerializable
      */
     protected function validateNoExtraFields(array $data): void
     {
-        $className = static::class;
-        $allowedFields = [];
-
-        foreach (self::$reflectionCache[$className] as $property) {
-            $attributes = $property->getAttributes(Field::class);
-            if (empty($attributes)) {
-                continue;
-            }
-
-            /** @var Field $field */
-            $field = $attributes[0]->newInstance();
-            $name = $property->getName();
-
-            // Both property name and alias are allowed
-            $allowedFields[$name] = true;
-            if ($field->alias) {
-                $allowedFields[$field->alias] = true;
-            }
+        $metadata = self::$metadataFactory?->getMetadata(static::class);
+        if ($metadata === null) {
+            throw new RuntimeException('Metadata factory not initialized');
         }
+        $allowedFields = $metadata->getAllowedFieldNames();
 
         foreach (array_keys($data) as $key) {
-            if (!isset($allowedFields[$key])) {
+            if (!in_array($key, $allowedFields, true)) {
                 throw new RuntimeException("Unknown field: $key");
             }
         }
@@ -125,7 +138,7 @@ abstract class Struct implements ArrayAccess, JsonSerializable
                 return;
             }
 
-            throw new RuntimeException("Missing required field: $name" . ($field->alias ? " (alias: {$field->alias})" : ""));
+            throw new FieldNotFoundException($name, $field->alias);
         }
 
         // Get value (prefer alias over property name)
@@ -133,22 +146,37 @@ abstract class Struct implements ArrayAccess, JsonSerializable
 
         if ($value === null) {
             if (!$field->nullable) {
-                throw new RuntimeException("Field $name cannot be null");
+                throw new ValidationException("Field $name cannot be null", $name, $value);
             }
             $property->setValue($this, null);
 
             return;
         }
 
+        // Apply transformations first
+        $transformedValue = $this->applyTransformations($value, $field->transformers ?? []);
+
         // Handle array fields
         if ($field->isArray) {
-            if (!is_array($value)) {
-                throw new RuntimeException("Field $name must be an array of {$field->type}");
+            if (!is_array($transformedValue)) {
+                $typeStr = is_array($field->type) ? implode('|', $field->type) : $field->type;
+
+                throw new ValidationException("Field $name must be an array of $typeStr", $name, $transformedValue);
             }
             $items = [];
-            foreach ($value as $item) {
+            foreach ($transformedValue as $item) {
                 $castedItem = $this->castValue($field->type, $item, $name);
-                $this->validateValue($field, $castedItem, $name);
+
+                // Apply validation to each array item
+                try {
+                    if (self::$fieldValidator === null) {
+                        throw new RuntimeException('Field validator not initialized');
+                    }
+                    self::$fieldValidator->validateField($field, $castedItem, $name);
+                } catch (ValidationException $e) {
+                    throw $e;
+                }
+
                 $items[] = $castedItem;
             }
             $property->setValue($this, $items);
@@ -156,48 +184,56 @@ abstract class Struct implements ArrayAccess, JsonSerializable
             return;
         }
 
-        $castedValue = $this->castValue($field->type, $value, $name);
-        $this->validateValue($field, $castedValue, $name);
+        $castedValue = $this->castValue($field->type, $transformedValue, $name);
+
+        // Use new validation system on the casted value
+        try {
+            if (self::$fieldValidator === null) {
+                throw new RuntimeException('Field validator not initialized');
+            }
+            self::$fieldValidator->validateField($field, $castedValue, $name);
+        } catch (ValidationException $e) {
+            throw $e;
+        }
+
         $property->setValue($this, $castedValue);
     }
 
     /**
-     * Validate a value using custom validator if specified
-     * @param Field $field
+     * Cast a value to the expected type
+     * @param string|array<string> $expected
      * @param mixed $value
      * @param string $fieldName
-     * @return void
+     * @return mixed
      */
-    protected function validateValue(Field $field, mixed $value, string $fieldName): void
+    protected function castValue(string|array $expected, mixed $value, string $fieldName): mixed
     {
-        if ($field->validator === null) {
-            return;
+        // Handle union types
+        if (is_array($expected)) {
+            foreach ($expected as $type) {
+                try {
+                    return $this->castSingleValue($type, $value, $fieldName);
+                } catch (ValidationException) {
+                    // Try next type
+                    continue;
+                }
+            }
+            $types = implode('|', $expected);
+
+            throw new ValidationException("Field $fieldName must be one of: $types", $fieldName, $value);
         }
 
-        if (!class_exists($field->validator)) {
-            throw new RuntimeException("Validator class {$field->validator} does not exist");
-        }
-
-        if (!method_exists($field->validator, 'validate')) {
-            throw new RuntimeException("Validator {$field->validator} must have a static validate() method");
-        }
-
-        $result = $field->validator::validate($value);
-        if ($result !== true) {
-            $message = is_string($result) ? $result : "Validation failed for field $fieldName";
-
-            throw new RuntimeException($message);
-        }
+        return $this->castSingleValue($expected, $value, $fieldName);
     }
 
     /**
-     * Cast a value to the expected type
+     * Cast a single value to the expected type
      * @param string $expected
      * @param mixed $value
      * @param string $fieldName
      * @return mixed
      */
-    protected function castValue(string $expected, mixed $value, string $fieldName): mixed
+    protected function castSingleValue(string $expected, mixed $value, string $fieldName): mixed
     {
         // Mixed type - accept anything
         if ($expected === 'mixed') {
@@ -207,7 +243,7 @@ abstract class Struct implements ArrayAccess, JsonSerializable
         // Scalars
         if (in_array($expected, ['string', 'int', 'float', 'bool'], true)) {
             if (get_debug_type($value) !== $expected) {
-                throw new RuntimeException("Field $fieldName must be of type $expected, got " . get_debug_type($value));
+                throw new ValidationException("Field $fieldName must be of type $expected, got " . get_debug_type($value), $fieldName, $value);
             }
 
             return $value;
@@ -222,32 +258,32 @@ abstract class Struct implements ArrayAccess, JsonSerializable
             // Try to convert from string/int for backed enums
             if (is_string($value) || is_int($value)) {
                 // Check if it's a backed enum by checking if it implements BackedEnum
-                if (is_subclass_of($expected, \BackedEnum::class)) {
+                if (is_subclass_of($expected, BackedEnum::class)) {
                     try {
                         return $expected::from($value);
-                    } catch (\ValueError $e) {
-                        throw new RuntimeException("Invalid value '$value' for enum $expected");
+                    } catch (ValueError $e) {
+                        throw new ValidationException("Invalid value '$value' for enum $expected", $fieldName, $value);
                     }
                 }
             }
 
-            throw new RuntimeException("Field $fieldName must be instance of enum $expected");
+            throw new ValidationException("Field $fieldName must be instance of enum $expected", $fieldName, $value);
         }
 
         // DateTime support
-        if (is_a($expected, \DateTimeInterface::class, true)) {
-            if ($value instanceof \DateTimeInterface) {
+        if (is_a($expected, DateTimeInterface::class, true)) {
+            if ($value instanceof DateTimeInterface) {
                 return $value;
             }
             if (is_string($value)) {
                 try {
-                    return new \DateTimeImmutable($value);
-                } catch (\Exception $e) {
-                    throw new RuntimeException("Field $fieldName: invalid datetime string: {$e->getMessage()}");
+                    return new DateTimeImmutable($value);
+                } catch (Exception $e) {
+                    throw new ValidationException("Field $fieldName: invalid datetime string: {$e->getMessage()}", $fieldName, $value);
                 }
             }
 
-            throw new RuntimeException("Field $fieldName must be DateTimeInterface or string");
+            throw new ValidationException("Field $fieldName must be DateTimeInterface or string", $fieldName, $value);
         }
 
         // Classes
@@ -268,10 +304,25 @@ abstract class Struct implements ArrayAccess, JsonSerializable
                 return new $expected($value);
             }
 
-            throw new RuntimeException("Field $fieldName must be instance of $expected or array");
+            throw new ValidationException("Field $fieldName must be instance of $expected or array", $fieldName, $value);
         }
 
-        throw new RuntimeException("Unsupported type $expected for field $fieldName");
+        throw new ValidationException("Unsupported type $expected for field $fieldName", $fieldName, $value);
+    }
+
+    /**
+     * Apply transformations to a value
+     * @param mixed $value
+     * @param TransformerInterface[] $transformers
+     * @return mixed
+     */
+    protected function applyTransformations(mixed $value, array $transformers): mixed
+    {
+        foreach ($transformers as $transformer) {
+            $value = $transformer->transform($value);
+        }
+
+        return $value;
     }
 
     // ArrayAccess
@@ -324,6 +375,12 @@ abstract class Struct implements ArrayAccess, JsonSerializable
         return $result;
     }
 
+    /**
+     * Convert struct to JSON string
+     * @param bool $pretty
+     * @param int $flags
+     * @return string
+     */
     public function toJson(
         bool $pretty = false,
         int $flags = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES

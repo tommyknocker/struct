@@ -37,31 +37,34 @@ composer require tommyknocker/struct
 ## ✨ Features
 
 * 🏷️ **Attribute-based field definitions** – Clean and declarative syntax
-* ✅ **Type validation** – Scalars, objects, arrays, enums, DateTime
+* ✅ **Advanced type validation** – Scalars, objects, arrays, enums, DateTime, union types
 * 🔒 **Immutability** – readonly properties by design
 * 🌐 **JSON support** – `toJson()`, `fromJson()`, `JsonSerializable`
 * 🔄 **Array conversion** – `toArray()` with recursive support
 * 📝 **Default values** – Optional fields with defaults
 * 🔑 **Field aliases** – Map different key names
-* ✔️ **Custom validators** – Add your own validation logic
+* ✔️ **Flexible validation system** – Custom validators, validation rules, and transformers
 * 🎭 **Mixed type support** – Handle dynamic data
 * ⏰ **DateTime parsing** – Automatic string to DateTime conversion
 * 🔁 **Cloning with modifications** – `with()` method
 * 📊 **ArrayAccess** – Array-like read access
 * 🧰 **PSR-11 container integration** – DI support
+* 🏭 **Factory pattern** – Centralized struct creation with dependency injection
 * 🔍 **PHPStan Level 9** – Maximum static analysis
 * 🧪 **100% tested** – PHPUnit coverage
-* ⚡ **Performance optimized** – Reflection caching
+* ⚡ **Performance optimized** – Reflection caching and metadata system
 
 ## 🎯 Use Cases
 
 Perfect for:
-- 📱 **REST API validation** for mobile apps
-- 🔄 **Data Transfer Objects (DTOs)** in clean architecture
-- 🌐 **Third-party API integration** with field mapping
-- ✅ **Form validation** with complex rules
-- 📊 **Data serialization/deserialization**
-- 🛡️ **Type-safe data handling** in microservices
+- 📱 **REST API validation** for mobile apps with flexible field types
+- 🔄 **Data Transfer Objects (DTOs)** in clean architecture with validation rules
+- 🌐 **Third-party API integration** with field mapping and transformations
+- ✅ **Form validation** with complex rules and data processing
+- 📊 **Data serialization/deserialization** with custom formats
+- 🛡️ **Type-safe data handling** in microservices with union types
+- 🏭 **Enterprise applications** with centralized struct creation and dependency injection
+- 🔍 **Data processing pipelines** with automatic transformations and validation
 
 👉 **[See practical examples](examples/)** for mobile app REST API scenarios
 
@@ -157,7 +160,57 @@ $user = new User([
 ]);
 ```
 
-### Custom Validation
+### Union Types
+
+```php
+final class FlexibleField extends Struct
+{
+    #[Field(['string', 'int'])]
+    public readonly string|int $value;
+}
+
+$flexible = new FlexibleField(['value' => 'hello']); // ✅ String
+$flexible2 = new FlexibleField(['value' => 42]);     // ✅ Integer
+// new FlexibleField(['value' => 3.14]); // ❌ Float not allowed
+```
+
+### Advanced Validation Rules
+
+```php
+use tommyknocker\struct\validation\rules\EmailRule;
+use tommyknocker\struct\validation\rules\RangeRule;
+
+final class UserProfile extends Struct
+{
+    #[Field('string', validationRules: [new EmailRule()])]
+    public readonly string $email;
+
+    #[Field('int', validationRules: [new RangeRule(18, 120)])]
+    public readonly int $age;
+}
+
+$profile = new UserProfile([
+    'email' => 'user@example.com',
+    'age' => 25
+]); // ✅ Valid
+```
+
+### Data Transformations
+
+```php
+use tommyknocker\struct\transformation\StringToUpperTransformer;
+
+final class ProcessedData extends Struct
+{
+    #[Field('string', transformers: [new StringToUpperTransformer()])]
+    public readonly string $name;
+}
+
+$data = new ProcessedData(['name' => 'john doe']);
+echo $data->name; // JOHN DOE
+```
+
+### Custom Validation (Legacy Support)
 
 ```php
 class EmailValidator
@@ -178,7 +231,7 @@ final class Contact extends Struct
 }
 
 $contact = new Contact(['email' => 'test@example.com']); // ✅ OK
-// new Contact(['email' => 'invalid']); // ❌ Throws RuntimeException
+// new Contact(['email' => 'invalid']); // ❌ Throws ValidationException
 ```
 
 ### DateTime Support
@@ -347,73 +400,214 @@ $request = new ApiRequest([
 Struct::$strictMode = false;
 ```
 
-### PSR-11 Container Integration
+### Factory Pattern
 
 ```php
-use Psr\Container\ContainerInterface;
-use tommyknocker\struct\Struct;
+use tommyknocker\struct\factory\StructFactory;
 
-// Setup container
-$container = new SimpleContainer();
-Struct::$container = $container;
+// Setup factory with dependencies
+$factory = new StructFactory();
 
-// Register Address
-$container->set(Address::class, new Address(['city' => 'Amsterdam', 'street' => 'Damrak']));
-
-// Create User - Address will be resolved from container
-$user = new User([
+// Create struct instances
+$user = $factory->create(User::class, [
     'name' => 'Alice',
-    'address' => ['city' => 'Amsterdam', 'street' => 'Damrak'],
+    'email' => 'alice@example.com'
+]);
+
+// Create from JSON
+$userFromJson = $factory->createFromJson(User::class, '{"name":"Bob","email":"bob@example.com"}');
+```
+
+### Error Handling
+
+```php
+use tommyknocker\struct\exception\ValidationException;
+use tommyknocker\struct\exception\FieldNotFoundException;
+
+try {
+    $user = new User(['name' => 'John', 'email' => 'invalid-email']);
+} catch (ValidationException $e) {
+    echo "Validation error: " . $e->getMessage();
+    echo "Field: " . $e->fieldName;
+    echo "Value: " . $e->value;
+} catch (FieldNotFoundException $e) {
+    echo "Missing field: " . $e->getMessage();
+}
+```
+
+### Real-World API Example
+
+```php
+// API endpoint for user registration
+final class RegisterRequest extends Struct
+{
+    #[Field('string', validationRules: [new EmailRule()])]
+    public readonly string $email;
+
+    #[Field('string', validationRules: [new RangeRule(8, 50)])]
+    public readonly string $password;
+
+    #[Field('string', alias: 'full_name')]
+    public readonly string $fullName;
+
+    #[Field('int', nullable: true, validationRules: [new RangeRule(13, 120)])]
+    public readonly ?int $age;
+}
+
+// In your API controller
+public function register(Request $request): JsonResponse
+{
+    try {
+        $data = RegisterRequest::fromJson($request->getContent());
+        
+        // Create user account
+        $user = User::create([
+            'email' => $data->email,
+            'password' => Hash::make($data->password),
+            'full_name' => $data->fullName,
+            'age' => $data->age,
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'user' => $user->toArray()
+        ]);
+        
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'field' => $e->fieldName
+        ], 422);
+    }
+}
+```
+
+## 💡 Best Practices
+
+### 1. Always Validate Input
+```php
+// ✅ Good - Validate all incoming data
+$userData = UserRequest::fromJson($request->getContent());
+
+// ❌ Bad - Trusting raw input
+$userData = json_decode($request->getContent(), true);
+```
+
+### 2. Use Specific Exception Types
+```php
+try {
+    $data = MyStruct::fromJson($json);
+} catch (ValidationException $e) {
+    // Handle validation errors specifically
+    return response()->json(['error' => $e->getMessage()], 422);
+} catch (FieldNotFoundException $e) {
+    // Handle missing fields
+    return response()->json(['error' => 'Missing required field'], 400);
+}
+```
+
+### 3. Leverage Field Aliases for API Integration
+```php
+final class ApiResponse extends Struct
+{
+    #[Field('string', alias: 'user_name')]
+    public readonly string $userName;
+    
+    #[Field('string', alias: 'email_address')]
+    public readonly string $emailAddress;
+}
+
+// Works with external API that uses snake_case
+$response = new ApiResponse([
+    'user_name' => 'John Doe',
+    'email_address' => 'john@example.com'
 ]);
 ```
+
+### 4. Use Default Values for Optional Fields
+```php
+final class Config extends Struct
+{
+    #[Field('string', default: 'localhost')]
+    public readonly string $host;
+    
+    #[Field('int', default: 3306)]
+    public readonly int $port;
+    
+    #[Field('bool', default: false)]
+    public readonly bool $debug;
+}
+
+// All fields get defaults if not provided
+$config = new Config([]);
+```
+
+### 5. Combine Validation Rules for Complex Logic
+```php
+final class PasswordField extends Struct
+{
+    #[Field('string', validationRules: [
+        new RequiredRule(),
+        new RangeRule(8, 128),
+        new PasswordStrengthRule()
+    ])]
+    public readonly string $password;
+}
+```
+
+---
+
+## ❓ FAQ
+
+### Q: How is this different from regular PHP classes?
+A: Struct provides automatic validation, type casting, JSON serialization, and immutability out of the box. Regular classes require manual implementation of these features.
+
+### Q: Can I use this with existing frameworks?
+A: Yes! Struct works with any PHP framework. See the [examples](examples/) for Laravel, Symfony, and Slim integration.
+
+### Q: What about performance?
+A: Struct uses reflection caching and optimized metadata systems. It's designed for production use with minimal overhead.
+
+### Q: Can I extend Struct classes?
+A: Yes, but remember that Struct classes are immutable. Use the `with()` method to create modified copies.
+
+### Q: How do I handle optional fields?
+A: Use `nullable: true` for fields that can be null, or `default: value` for fields with default values.
+
+### Q: What validation rules are available?
+A: Built-in rules include `EmailRule`, `RangeRule`, `RequiredRule`. You can create custom rules by extending `ValidationRule`.
+
+### Q: Can I use this for database models?
+A: Struct is designed for data validation and transfer, not ORM functionality. Use it for DTOs, API requests/responses, and data validation.
 
 ---
 
 ## 🧪 Testing
 
-Run the test suite:
+The library is thoroughly tested with 100% code coverage:
 
 ```bash
 composer test
 ```
 
-Run PHPStan static analysis:
+All examples are verified to work:
 
 ```bash
-composer phpstan
-```
-
-Check code style:
-
-```bash
-composer cs-check
-```
-
-Run all checks:
-
-```bash
-composer check
+composer test-examples
 ```
 
 ---
 
 ## 🛠️ Development
 
-### Code Style
+This project follows PSR-12 coding standards and uses PHPStan Level 9 for static analysis.
 
-This project uses PHP-CS-Fixer with PSR-12 standard:
-
-```bash
-composer cs-fix
-```
-
-### Static Analysis
-
-PHPStan is configured at level 9 for maximum type safety:
-
-```bash
-composer phpstan
-```
+For contributors:
+- Run `composer check` to verify all tests and standards
+- Follow the existing code style
+- Add tests for new features
+- Update documentation as needed
 
 ---
 
@@ -423,13 +617,67 @@ composer phpstan
 
 ```php
 #[Field(
-    type: string,              // Type: 'string', 'int', 'float', 'bool', 'mixed', or class-string
-    nullable: bool = false,    // Allow null values
-    isArray: bool = false,     // Field is array of type
-    default: mixed = null,     // Default value if not provided
-    alias: ?string = null,     // Alternative key name in input data
-    validator: ?string = null  // Validator class with static validate() method
+    type: string|array<string>,                    // Type: 'string', 'int', 'float', 'bool', 'mixed', class-string, or array of types for union
+    nullable: bool = false,                        // Allow null values
+    isArray: bool = false,                         // Field is array of type
+    default: mixed = null,                         // Default value if not provided
+    alias: ?string = null,                         // Alternative key name in input data
+    validator: ?string = null,                     // Legacy validator class with static validate() method
+    validationRules: array = [],                   // Array of ValidationRule instances
+    transformers: array = []                       // Array of TransformerInterface instances
 )]
+```
+
+### Validation Rules
+
+```php
+// Built-in validation rules
+use tommyknocker\struct\validation\rules\EmailRule;
+use tommyknocker\struct\validation\rules\RangeRule;
+use tommyknocker\struct\validation\rules\RequiredRule;
+
+// Custom validation rule
+class CustomRule extends \tommyknocker\struct\validation\ValidationRule
+{
+    public function validate(mixed $value): \tommyknocker\struct\validation\ValidationResult
+    {
+        // Your validation logic
+        return \tommyknocker\struct\validation\ValidationResult::valid();
+    }
+}
+```
+
+### Data Transformers
+
+```php
+// Built-in transformers
+use tommyknocker\struct\transformation\StringToUpperTransformer;
+use tommyknocker\struct\transformation\StringToLowerTransformer;
+
+// Custom transformer
+class CustomTransformer implements \tommyknocker\struct\transformation\TransformerInterface
+{
+    public function transform(mixed $value): mixed
+    {
+        // Your transformation logic
+        return $value;
+    }
+}
+```
+
+### Factory and Serialization
+
+```php
+// Factory for struct creation
+use tommyknocker\struct\factory\StructFactory;
+
+// JSON serialization
+use tommyknocker\struct\serialization\JsonSerializer;
+
+// Metadata system
+use tommyknocker\struct\metadata\MetadataFactory;
+use tommyknocker\struct\metadata\StructMetadata;
+use tommyknocker\struct\metadata\FieldMetadata;
 ```
 
 ### Struct Methods

@@ -152,7 +152,7 @@ function createOrder(string $jsonInput): array
             'success' => true,
             'data' => $order,
         ];
-    } catch (RuntimeException | JsonException $e) {
+    } catch (RuntimeException $e) {
         return [
             'success' => false,
             'error' => $e->getMessage(),
