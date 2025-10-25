@@ -66,11 +66,13 @@ final class ValidationRulesTest extends TestCase
 
         $result = $rule->validate('invalid-email');
         $this->assertFalse($result->isValid());
-        $this->assertStringContains('Invalid email format', $result->getErrorMessage());
+        $this->assertNotNull($result->getErrorMessage());
+        $this->assertStringContainsString('Invalid email format', $result->getErrorMessage());
 
         $result = $rule->validate(123);
         $this->assertFalse($result->isValid());
-        $this->assertStringContains('Invalid email format', $result->getErrorMessage());
+        $this->assertNotNull($result->getErrorMessage());
+        $this->assertStringContainsString('Invalid email format', $result->getErrorMessage());
     }
 
     public function testRangeRuleValidation(): void
