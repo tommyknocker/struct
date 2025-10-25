@@ -151,10 +151,10 @@ final class MetadataSystemTest extends TestCase
         // Get metadata again - should create new instance
         $metadata2 = $factory->getMetadata(TestStruct::class);
         $this->assertInstanceOf(StructMetadata::class, $metadata2);
-        
+
         // Should be different instances after cache clear
         $this->assertNotSame($metadata1, $metadata2);
-        
+
         // But should have same content
         $this->assertEquals($metadata1->className, $metadata2->className);
         $this->assertEquals($metadata1->fields, $metadata2->fields);

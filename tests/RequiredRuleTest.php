@@ -6,7 +6,6 @@ namespace tommyknocker\struct\tests;
 
 use PHPUnit\Framework\TestCase;
 use tommyknocker\struct\validation\rules\RequiredRule;
-use tommyknocker\struct\validation\ValidationResult;
 
 final class RequiredRuleTest extends TestCase
 {
