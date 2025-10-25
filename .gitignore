@@ -13,9 +13,14 @@ Thumbs.db
 
 # Composer
 vendor/
+composer.lock
 
 # PHP CS Fixer cache
 .php-cs-fixer.cache
 
 # PHPStan cache
 .phpstan.cache
+
+# PHPUnit cache
+.phpunit.cache/
+.phpunit.coverage/
