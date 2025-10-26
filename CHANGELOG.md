@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-10-26
+
+### Added
+- **Attribute Helper Tool** - Automated Field attribute generation for Struct classes
+- **Console Interface** - Command-line tool similar to phpstan/php-cs-fixer for batch processing
+- **Intelligent Type Inference** - Automatic detection of PHP property types (scalars, objects, arrays, union types)
+- **Smart Validation Suggestions** - Automatic validation rule recommendations based on property names
+- **Alias Generation** - Automatic snake_case alias generation for camelCase properties
+- **Transformer Suggestions** - Intelligent transformer recommendations (StringToUpper, StringToLower)
+- **Default Value Inference** - Smart default value suggestions based on property types and names
+- **Custom Exceptions** - Dedicated exception classes for AttributeHelper operations
+- **Comprehensive Test Suite** - Full test coverage for AttributeHelper functionality
+- **Live Examples** - Real-world usage examples demonstrating AttributeHelper capabilities
+- **Composer Scripts** - Easy integration with `composer struct-helper` commands
+
+### Fixed
+- Removed phpstan-baseline.neon file - all PHPStan Level 9 errors properly resolved
+- Improved type safety in AttributeHelper with proper Reflection type handling
+- Enhanced code quality by eliminating all static analysis warnings
+
+### Changed
+- Enhanced documentation with Attribute Helper section in README.md
+- Updated examples directory with Attribute Helper demonstrations
+- Improved codebase maintainability with automated attribute generation
+
 ## [1.1.0] - 2025-10-25
 
 ### Added

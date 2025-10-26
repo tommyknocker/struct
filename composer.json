@@ -53,7 +53,8 @@
   },
   "autoload": {
     "psr-4": {
-      "tommyknocker\\struct\\": "src/"
+      "tommyknocker\\struct\\": "src/",
+      "tommyknocker\\struct\\scripts\\": "scripts/"
     }
   },
   "autoload-dev": {
@@ -66,10 +67,12 @@
     "test-examples": "./scripts/test-examples.sh",
     "test-coverage": "./vendor/bin/phpunit --coverage-html coverage",
     "phpstan": "./vendor/bin/phpstan analyse",
-    "phpstan-baseline": "./vendor/bin/phpstan analyse --generate-baseline",
     "cs-fix": "./vendor/bin/php-cs-fixer fix",
     "cs-check": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
     "cs-config": "./vendor/bin/php-cs-fixer config:dump",
+    "struct-helper": "php scripts/struct-helper.php",
+    "struct-helper-dry": "php scripts/struct-helper.php --dry-run",
+    "struct-helper-verbose": "php scripts/struct-helper.php --verbose",
     "quality": [
       "@cs-check",
       "@phpstan",

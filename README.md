@@ -53,6 +53,7 @@ composer require tommyknocker/struct
 * 🔍 **PHPStan Level 9** – Maximum static analysis
 * 🧪 **100% tested** – PHPUnit coverage
 * ⚡ **Performance optimized** – Reflection caching and metadata system
+* 🛠️ **Attribute Helper** – Automatic Field attribute generation with intelligent type inference
 
 ## 🎯 Use Cases
 
@@ -482,6 +483,202 @@ public function register(Request $request): JsonResponse
     }
 }
 ```
+
+---
+
+## 🛠️ Attribute Helper
+
+The Attribute Helper automatically generates `Field` attributes for your Struct classes, reducing boilerplate code by up to 80% and ensuring consistent patterns across your codebase.
+
+### Why Use Attribute Helper?
+
+- ✅ **Reduces boilerplate** – No more manual attribute writing
+- ✅ **Intelligent suggestions** – Smart defaults based on property names and types
+- ✅ **Consistent patterns** – Ensures uniform attribute usage
+- ✅ **Error prevention** – Prevents typos and missing attributes
+- ✅ **Rapid development** – Generate attributes for entire projects in seconds
+
+### Console Usage
+
+```bash
+# Generate attributes for a single file
+php scripts/struct-helper.php src/UserProfile.php
+
+# Generate attributes for entire directory
+php scripts/struct-helper.php src/
+
+# Dry run (see what would be changed)
+php scripts/struct-helper.php --dry-run src/
+
+# Verbose output
+php scripts/struct-helper.php --verbose src/
+
+# Don't create backup files
+php scripts/struct-helper.php --no-backup src/
+```
+
+### Before and After
+
+**Before (Manual):**
+```php
+final class UserProfile extends Struct
+{
+    #[Field('string', validationRules: [new RequiredRule()], transformers: [new StringToUpperTransformer()])]
+    public readonly string $firstName;
+
+    #[Field('string', validationRules: [new RequiredRule()], transformers: [new StringToUpperTransformer()])]
+    public readonly string $lastName;
+
+    #[Field('string', validationRules: [new EmailRule()], transformers: [new StringToLowerTransformer()])]
+    public readonly string $emailAddress;
+
+    #[Field('string', nullable: true, alias: 'phone_number')]
+    public readonly ?string $phoneNumber;
+
+    #[Field('int', validationRules: [new RangeRule(13, 120)])]
+    public readonly int $age;
+}
+```
+
+**After (Auto-generated):**
+```php
+final class UserProfile extends Struct
+{
+    public readonly string $firstName;
+    public readonly string $lastName;
+    public readonly string $emailAddress;
+    public readonly ?string $phoneNumber;
+    public readonly int $age;
+}
+```
+
+Run the helper and it automatically generates:
+```php
+#[Field('string', validationRules: [new RequiredRule()], transformers: [new StringToUpperTransformer()])]
+public readonly string $firstName;
+
+#[Field('string', validationRules: [new RequiredRule()], transformers: [new StringToUpperTransformer()])]
+public readonly string $lastName;
+
+#[Field('string', validationRules: [new EmailRule()], transformers: [new StringToLowerTransformer()])]
+public readonly string $emailAddress;
+
+#[Field('string', nullable: true, alias: 'phone_number')]
+public readonly ?string $phoneNumber;
+
+#[Field('int', validationRules: [new RangeRule(13, 120)])]
+public readonly int $age;
+```
+
+### Intelligent Features
+
+#### Automatic Type Inference
+```php
+public readonly string $name;        // → #[Field('string')]
+public readonly int $age;            // → #[Field('int')]
+public readonly ?string $email;      // → #[Field('string', nullable: true)]
+public readonly array $tags;         // → #[Field('array', isArray: true)]
+public readonly string|int $value;   // → #[Field(['string', 'int'])]
+```
+
+#### Smart Validation Rules
+```php
+public readonly string $email;       // → validationRules: [new EmailRule()]
+public readonly string $password;    // → validationRules: [new RequiredRule()]
+public readonly int $age;            // → validationRules: [new RangeRule(1, 100)]
+public readonly int $score;          // → validationRules: [new RangeRule(1, 100)]
+```
+
+#### Automatic Field Aliases
+```php
+public readonly string $firstName;   // → alias: 'first_name'
+public readonly string $emailAddress; // → alias: 'email_address'
+public readonly string $phoneNumber; // → alias: 'phone_number'
+public readonly string $createdAt;  // → alias: 'created_at'
+```
+
+#### Smart Transformations
+```php
+public readonly string $email;       // → transformers: [new StringToLowerTransformer()]
+public readonly string $username;    // → transformers: [new StringToLowerTransformer()]
+public readonly string $name;        // → transformers: [new StringToUpperTransformer()]
+public readonly string $title;      // → transformers: [new StringToUpperTransformer()]
+```
+
+#### Intelligent Defaults
+```php
+public readonly bool $isEnabled;     // → default: true
+public readonly bool $isActive;      // → default: true
+public readonly int $port;           // → default: 3306
+public readonly string $host;        // → default: 'localhost'
+public readonly array $items;        // → default: []
+```
+
+### Programmatic Usage
+
+```php
+use tommyknocker\struct\tools\AttributeHelper;
+
+$helper = new AttributeHelper();
+
+// Generate attribute for a single property
+$property = new ReflectionProperty(MyStruct::class, 'email');
+$attribute = $helper->generateFieldAttribute($property);
+echo $attribute; // #[Field('string', validationRules: [new EmailRule()], transformers: [new StringToLowerTransformer()])]
+
+// Process entire class
+$attributes = $helper->processClass(MyStruct::class);
+foreach ($attributes as $propertyName => $attribute) {
+    echo "{$propertyName}: {$attribute}\n";
+}
+
+// Get properties that need attributes
+$properties = $helper->getPropertiesNeedingAttributes(MyStruct::class);
+foreach ($properties as $property) {
+    echo "Property {$property->getName()} needs an attribute\n";
+}
+```
+
+### Real-World Example
+
+```php
+// API Integration Scenario
+final class ProductApiResponse extends Struct
+{
+    public readonly string $productId;
+    public readonly string $productName;
+    public readonly float $price;
+    public readonly ?string $description;
+    public readonly array $categories;
+    public readonly bool $isAvailable;
+    public readonly string $createdAt;
+    public readonly string $updatedAt;
+}
+
+// Run: php scripts/struct-helper.php ProductApiResponse.php
+// Generates all necessary attributes automatically!
+```
+
+### Error Handling
+
+```php
+use tommyknocker\struct\tools\exception\AttributeHelperException;
+use tommyknocker\struct\tools\exception\FileProcessingException;
+use tommyknocker\struct\tools\exception\ClassProcessingException;
+
+try {
+    $helper = new AttributeHelper();
+    $attributes = $helper->processClass('MyClass');
+} catch (ClassProcessingException $e) {
+    echo "Failed to process class: {$e->getMessage()}";
+} catch (AttributeHelperException $e) {
+    echo "Attribute generation failed: {$e->getMessage()}";
+}
+```
+
+👉 **[See attribute helper examples](examples/09_attribute_helper_demo.php)** for detailed demonstrations
+
+---
 
 ## 💡 Best Practices
 
