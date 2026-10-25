@@ -8,10 +8,8 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use tommyknocker\struct\Field;
 use tommyknocker\struct\Struct;
-use tommyknocker\struct\tests\fixtures\AlwaysFailValidator;
-use tommyknocker\struct\tests\fixtures\EmailValidator;
-use tommyknocker\struct\tests\fixtures\NoValidateMethodValidator;
 use tommyknocker\struct\tests\fixtures\ValidatedUser;
+use tommyknocker\struct\validation\rules\EmailRule;
 
 final class StructValidatorTest extends TestCase
 {
@@ -67,7 +65,7 @@ final class StructValidatorTest extends TestCase
     public function testValidatorInArray(): void
     {
         $struct = new class (['emails' => ['john@example.com', 'jane@example.com']]) extends Struct {
-            #[Field('string', validator: EmailValidator::class, isArray: true)]
+            #[Field('string', itemRules: [new EmailRule()], collection: \tommyknocker\struct\CollectionType::Preserve)]
             public readonly array $emails;
         };
 
@@ -80,41 +78,9 @@ final class StructValidatorTest extends TestCase
         $this->expectExceptionMessage('Invalid email format');
 
         new class (['emails' => ['john@example.com', 'invalid']]) extends Struct {
-            #[Field('string', validator: EmailValidator::class, isArray: true)]
+            #[Field('string', itemRules: [new EmailRule()], collection: \tommyknocker\struct\CollectionType::Preserve)]
             public readonly array $emails;
         };
     }
 
-    public function testNonExistentValidatorClass(): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Validator class NonExistentValidator does not exist');
-
-        new class (['value' => 'test']) extends Struct {
-            #[Field('string', validator: 'NonExistentValidator')]
-            public readonly string $value;
-        };
-    }
-
-    public function testValidatorWithoutValidateMethod(): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('must have a static validate() method');
-
-        new class (['value' => 'test']) extends Struct {
-            #[Field('string', validator: NoValidateMethodValidator::class)]
-            public readonly string $value;
-        };
-    }
-
-    public function testValidatorReturnsErrorMessage(): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Always fails');
-
-        new class (['value' => 'test']) extends Struct {
-            #[Field('string', validator: AlwaysFailValidator::class)]
-            public readonly string $value;
-        };
-    }
 }

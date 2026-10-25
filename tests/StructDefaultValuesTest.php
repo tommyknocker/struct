@@ -90,7 +90,7 @@ final class StructDefaultValuesTest extends TestCase
             #[Field('string')]
             public readonly string $name;
 
-            #[Field('int', nullable: true)]
+            #[Field('int', required: false)]
             public readonly ?int $age;
         };
 

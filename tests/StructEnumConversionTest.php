@@ -72,7 +72,7 @@ final class StructEnumConversionTest extends TestCase
     public function testInvalidEnumValue(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("Invalid value 'invalid' for enum");
+        $this->expectExceptionMessage("Invalid value for enum");
 
         new TaskStruct([
             'title' => 'My Task',
@@ -84,7 +84,7 @@ final class StructEnumConversionTest extends TestCase
     public function testInvalidIntEnumValue(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("Invalid value '99' for enum");
+        $this->expectExceptionMessage("Invalid value for enum");
 
         new TaskStruct([
             'title' => 'My Task',
@@ -117,7 +117,7 @@ final class StructEnumConversionTest extends TestCase
     public function testEnumInArray(): void
     {
         $struct = new class (['statuses' => ['active', 'pending', 'inactive']]) extends Struct {
-            #[Field(Status::class, isArray: true)]
+            #[Field(Status::class, collection: \tommyknocker\struct\CollectionType::Preserve)]
             public readonly array $statuses;
         };
 
@@ -130,10 +130,10 @@ final class StructEnumConversionTest extends TestCase
     public function testEnumInArrayWithInvalidValue(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("Invalid value 'invalid'");
+        $this->expectExceptionMessage("Invalid value for enum");
 
         new class (['statuses' => ['active', 'invalid']]) extends Struct {
-            #[Field(Status::class, isArray: true)]
+            #[Field(Status::class, collection: \tommyknocker\struct\CollectionType::Preserve)]
             public readonly array $statuses;
         };
     }
@@ -157,7 +157,7 @@ final class StructEnumConversionTest extends TestCase
 
         $array = $task->toArray();
 
-        $this->assertSame(Status::Active, $array['status']);
-        $this->assertSame(Priority::Low, $array['priority']);
+        $this->assertSame(Status::Active->value, $array['status']);
+        $this->assertSame(Priority::Low->value, $array['priority']);
     }
 }

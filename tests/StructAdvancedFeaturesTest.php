@@ -27,7 +27,7 @@ final class DateTimeStruct extends Struct
     #[Field(DateTimeImmutable::class)]
     public readonly DateTimeImmutable $createdAt;
 
-    #[Field(DateTimeImmutable::class, nullable: true)]
+    #[Field(DateTimeImmutable::class)]
     public readonly ?DateTimeImmutable $updatedAt;
 }
 
@@ -73,7 +73,7 @@ final class StructAdvancedFeaturesTest extends TestCase
             #[Field('string')]
             public readonly string $type;
 
-            #[Field('mixed', nullable: true)]
+            #[Field('mixed')]
             public readonly mixed $data;
         };
 
@@ -150,7 +150,7 @@ final class StructAdvancedFeaturesTest extends TestCase
     public function testFromJsonNotArray(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('JSON must decode to an array');
+        $this->expectExceptionMessage('JSON root must be an object');
 
         MixedTypeStruct::fromJson('"just a string"');
     }

@@ -38,7 +38,7 @@ final class StructTest extends TestCase
     public function testJsonSerialize(): void
     {
         $struct = new DummyStruct(['name' => 'Alice', 'age' => 25, 'isMarried' => false]);
-        $this->assertSame(['name' => 'Alice', 'age' => 25, 'isMarried' => false], $struct->jsonSerialize());
+        $this->assertSame(['name' => 'Alice', 'age' => 25, 'isMarried' => false], (array) $struct->jsonSerialize());
     }
 
     public function testArrayAccess(): void

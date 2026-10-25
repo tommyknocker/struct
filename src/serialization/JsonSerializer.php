@@ -45,17 +45,9 @@ final class JsonSerializer implements SerializerInterface
     public function toJson(
         Struct $struct,
         bool $pretty = false,
-        int $flags = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        int $flags = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION
     ): string {
-        if ($pretty) {
-            $flags |= JSON_PRETTY_PRINT;
-        }
-        $result = json_encode($struct, $flags);
-        if ($result === false) {
-            throw new \RuntimeException('Failed to encode struct to JSON');
-        }
-
-        return $result;
+        return $struct->toJson($pretty, $flags);
     }
 
     /**
@@ -68,11 +60,6 @@ final class JsonSerializer implements SerializerInterface
      */
     public function fromJson(string $json, string $structClass, int $flags = JSON_THROW_ON_ERROR): Struct
     {
-        $data = json_decode($json, true, 512, $flags);
-        if (!is_array($data)) {
-            throw new \RuntimeException('JSON must decode to an array');
-        }
-
-        return new $structClass($data);
+        return $structClass::fromJson($json, $flags);
     }
 }

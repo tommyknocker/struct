@@ -9,45 +9,18 @@ use tommyknocker\struct\Field;
 
 final class FieldTest extends TestCase
 {
-    public function testHasDefaultReturnsTrueWhenDefaultIsNotNull(): void
+    public function testFieldsAreRequiredUnlessExplicitlyOptional(): void
     {
-        $field = new Field('string', default: 'default value');
-        $this->assertTrue($field->hasDefault());
+        $this->assertTrue((new Field())->required);
+        $this->assertFalse((new Field(required: false))->required);
     }
 
-    public function testHasDefaultReturnsTrueWhenNullable(): void
+    public function testDefaultsAreIndependentOfRequiredAndNullability(): void
     {
-        $field = new Field('string', nullable: true);
-        $this->assertTrue($field->hasDefault());
-    }
-
-    public function testHasDefaultReturnsTrueWhenBothDefaultAndNullable(): void
-    {
-        $field = new Field('string', nullable: true, default: 'default value');
-        $this->assertTrue($field->hasDefault());
-    }
-
-    public function testHasDefaultReturnsFalseWhenNoDefaultAndNotNullable(): void
-    {
-        $field = new Field('string');
-        $this->assertFalse($field->hasDefault());
-    }
-
-    public function testHasDefaultReturnsFalseWhenDefaultIsNullAndNotNullable(): void
-    {
-        $field = new Field('string', nullable: false, default: null);
-        $this->assertFalse($field->hasDefault());
-    }
-
-    public function testHasDefaultWithDifferentDefaultValues(): void
-    {
-        $field1 = new Field('int', default: 0);
-        $this->assertTrue($field1->hasDefault());
-
-        $field2 = new Field('bool', default: false);
-        $this->assertTrue($field2->hasDefault());
-
-        $field3 = new Field('array', default: []);
-        $this->assertTrue($field3->hasDefault());
+        $this->assertFalse((new Field())->hasDefault());
+        $this->assertFalse((new Field(required: false))->hasDefault());
+        foreach ([null, false, 0, [], 'default'] as $default) {
+            $this->assertTrue((new Field(default: $default))->hasDefault());
+        }
     }
 }

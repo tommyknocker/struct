@@ -4,49 +4,27 @@ declare(strict_types=1);
 
 namespace tommyknocker\struct\validation\rules;
 
+use InvalidArgumentException;
 use tommyknocker\struct\validation\ValidationResult;
 use tommyknocker\struct\validation\ValidationRule;
 
-/**
- * Range validation rule for numeric values
- */
+/** Inclusive range for finite native numbers. */
 final class RangeRule implements ValidationRule
 {
-    /**
-     * @var int|float The minimum value
-     */
-    protected readonly int|float $min;
-
-    /**
-     * @var int|float The maximum value
-     */
-    protected readonly int|float $max;
-
-    public function __construct(
-        int|float $min,
-        int|float $max
-    ) {
-        $this->min = $min;
-        $this->max = $max;
+    public function __construct(private readonly int|float $min, private readonly int|float $max)
+    {
+        if (!is_finite((float) $min) || !is_finite((float) $max) || $min > $max) {
+            throw new InvalidArgumentException('Range bounds must be finite and min <= max');
+        }
     }
 
-    /**
-     * Validates that the given value is within the specified range
-     * @param mixed $value The value to validate
-     * @return ValidationResult The result of the validation
-     */
     public function validate(mixed $value): ValidationResult
     {
-        if (!is_numeric($value)) {
-            return ValidationResult::invalid('Value must be numeric');
+        if ((!is_int($value) && !is_float($value)) || !is_finite((float) $value)) {
+            return ValidationResult::invalid('Value must be a finite number');
         }
-
-        $numericValue = is_string($value) ? (float) $value : $value;
-
-        if ($numericValue < $this->min || $numericValue > $this->max) {
-            return ValidationResult::invalid(
-                "Value must be between {$this->min} and {$this->max}"
-            );
+        if ($value < $this->min || $value > $this->max) {
+            return ValidationResult::invalid("Value must be between {$this->min} and {$this->max}");
         }
 
         return ValidationResult::valid();

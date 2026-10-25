@@ -1,0 +1,5 @@
+services:
+    -
+        class: tommyknocker\struct\phpstan\FieldPropertyExtension
+        tags:
+            - phpstan.properties.readWriteExtension

@@ -15,9 +15,9 @@ final class ValidatedUser extends Struct
     #[Field('string')]
     public readonly string $username;
 
-    #[Field('string', validator: EmailValidator::class)]
+    #[Field('string', validationRules: [new \tommyknocker\struct\validation\rules\EmailRule()])]
     public readonly string $email;
 
-    #[Field('int', validator: RangeValidator::class)]
+    #[Field('int', validationRules: [new \tommyknocker\struct\validation\rules\RangeRule(1, 100)])]
     public readonly int $score;
 }

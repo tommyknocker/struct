@@ -12,7 +12,7 @@ final class DummyStruct extends Struct
     #[Field('string')]
     public readonly string $name;
 
-    #[Field('int', nullable: true)]
+    #[Field('int')]
     public readonly ?int $age;
 
     #[Field('bool')]

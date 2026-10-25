@@ -4,77 +4,39 @@ declare(strict_types=1);
 
 namespace tommyknocker\struct\metadata;
 
+use ReflectionProperty;
+use tommyknocker\struct\CollectionType;
+use tommyknocker\struct\DefaultValue;
 use tommyknocker\struct\transformation\TransformerInterface;
 use tommyknocker\struct\validation\ValidationRule;
 
-/**
- * Metadata for a single field in a struct
- */
+/** Compiled mapping definition; a single source of truth for runtime mapping. */
 final class FieldMetadata
 {
     /**
-     * @var string The name of the field
-     */
-    public readonly string $name;
-    /**
-     * @var string|array<string> The type(s) of the field
-     */
-    public readonly string|array $type;
-    /**
-     * @var bool Whether the field is nullable
-     */
-    public readonly bool $nullable;
-    /**
-     * @var bool Whether the field is an array
-     */
-    public readonly bool $isArray;
-    /**
-     * @var mixed The default value of the field
-     */
-    public readonly mixed $default;
-    /**
-     * @var string|null The alias of the field
-     */
-    public readonly ?string $alias;
-    /**
-     * @var ValidationRule[] The validation rules for the field
-     */
-    public readonly array $validationRules;
-    /**
-     * @var TransformerInterface[] The transformers for the field
-     */
-    public readonly array $transformers;
-
-    /**
-     * @param string|array<string> $type
-     * @param ValidationRule[] $validationRules
-     * @param TransformerInterface[] $transformers
+     * @param string|list<string> $type
+     * @param list<ValidationRule> $validationRules
+     * @param list<ValidationRule> $itemRules
+     * @param list<TransformerInterface> $transformers
      */
     public function __construct(
-        string $name,
-        string|array $type,
-        bool $nullable,
-        bool $isArray,
-        mixed $default,
-        ?string $alias,
-        array $validationRules,
-        array $transformers
+        public readonly string $name,
+        public readonly string|array $type,
+        public readonly bool $nullable,
+        public readonly ?CollectionType $collection,
+        public readonly mixed $default,
+        public readonly ?string $alias,
+        public readonly array $validationRules,
+        public readonly array $transformers,
+        public readonly array $itemRules,
+        public readonly ?string $outputAlias,
+        public readonly bool $required,
+        public readonly ReflectionProperty $property
     ) {
-        $this->name = $name;
-        $this->type = $type;
-        $this->nullable = $nullable;
-        $this->isArray = $isArray;
-        $this->default = $default;
-        $this->alias = $alias;
-        $this->validationRules = $validationRules;
-        $this->transformers = $transformers;
     }
 
-    /**
-     * Check if field has a default value
-     */
     public function hasDefault(): bool
     {
-        return $this->default !== null || $this->nullable;
+        return $this->default !== DefaultValue::Missing;
     }
 }

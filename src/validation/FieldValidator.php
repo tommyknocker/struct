@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace tommyknocker\struct\validation;
 
 use tommyknocker\struct\exception\ValidationException;
-use tommyknocker\struct\Field;
+use tommyknocker\struct\metadata\FieldMetadata;
 
 /**
  * Validator for struct fields
@@ -15,16 +15,16 @@ final class FieldValidator
     /**
      * Validates a field's value against its validation rules
      *
-     * @param Field $field The field to validate
+     * @param FieldMetadata $field The field to validate
      * @param mixed $value The value to validate
      * @param string $fieldName The name of the field (for error reporting)
      * @throws ValidationException if validation fails
      */
-    public function validateField(Field $field, mixed $value, string $fieldName): void
+    public function validateField(FieldMetadata $field, mixed $value, string $fieldName): void
     {
-        // Apply custom validation rules (including legacy validator)
-        $rules = $field->getEffectiveValidationRules();
-        $this->applyValidationRules($value, $rules, $fieldName);
+        // Apply custom validation rules in declaration order
+        $rules = $field->validationRules;
+        $this->validateRules($value, $rules, $fieldName);
 
         // If we get here, validation passed
     }
@@ -37,7 +37,7 @@ final class FieldValidator
      * @param string $fieldName The name of the field (for error reporting)
      * @throws ValidationException if any rule fails
      */
-    protected function applyValidationRules(mixed $value, array $rules, string $fieldName): void
+    public function validateRules(mixed $value, array $rules, string $fieldName): void
     {
         foreach ($rules as $rule) {
             $result = $rule->validate($value);

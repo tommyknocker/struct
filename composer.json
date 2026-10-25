@@ -1,40 +1,18 @@
 {
   "name": "tommyknocker/struct",
-  "description": "PHP Structure helper with typed properties and attributes",
+  "description": "Map external arrays and JSON into validated PHP DTOs and explicit outbound payloads",
   "type": "library",
   "license": "MIT",
   "keywords": [
-    "struct",
-    "struct-helper",
-    "data-structure",
-    "schema",
-    "validation",
-    "typed properties",
-    "attributes",
-    "type-casting",
-    "data-validation",
-    "template-driven",
     "dto",
-    "data-transfer-object",
-    "immutable",
-    "readonly",
-    "json-serialization",
-    "array-access",
-    "php8",
-    "php81",
-    "reflection",
-    "metadata",
-    "factory-pattern",
-    "psr-11",
-    "dependency-injection",
-    "api-validation",
-    "form-validation",
+    "data-mapping",
+    "validation",
     "serialization",
-    "deserialization",
-    "type-safe",
-    "runtime-validation",
-    "static-analysis",
-    "phpstan"
+    "json",
+    "typed-properties",
+    "attributes",
+    "api",
+    "php"
   ],
   "authors": [
     {
@@ -43,8 +21,7 @@
     }
   ],
   "require": {
-    "php": "^8.1",
-    "psr/container": "^2.0"
+    "php": "^8.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^10.0|^11.0",
@@ -53,8 +30,7 @@
   },
   "autoload": {
     "psr-4": {
-      "tommyknocker\\struct\\": "src/",
-      "tommyknocker\\struct\\scripts\\": "scripts/"
+      "tommyknocker\\struct\\": "src/"
     }
   },
   "autoload-dev": {
@@ -86,19 +62,58 @@
       "@cs-check",
       "@phpstan",
       "@test",
-      "@test-examples"
+      "@test-examples",
+      "@test-package"
     ],
     "ci": [
       "@cs-check",
       "@phpstan",
       "@test",
-      "@test-examples"
+      "@test-examples",
+      "@test-package"
     ],
-    "post-install-cmd": [
-      "@test-examples"
-    ],
-    "post-update-cmd": [
-      "@test-examples"
+    "test-package": "bash scripts/test-package.sh"
+  },
+  "bin": [
+    "scripts/struct-helper.php"
+  ],
+  "extra": {
+    "phpstan": {
+      "includes": [
+        "extension.neon"
+      ]
+    }
+  },
+  "archive": {
+    "exclude": [
+      "/.git*",
+      "/.agents/**",
+      "/.aws/**",
+      "/.codex/**",
+      "/.idea/**",
+      "/.codegraph/**",
+      "/.vscode/**",
+      "/.php*",
+      "/.php*/**",
+      "/phpstan.neon",
+      "/phpunit.xml",
+      "/composer.lock",
+      "/vendor/**",
+      "/tests/**",
+      "/coverage/**",
+      "/*.bak",
+      "/scripts/test-examples.sh",
+      "/.agents",
+      "/.aws",
+      "/.codex",
+      "/.idea",
+      "/.codegraph",
+      "/.vscode",
+      "/.phpunit.coverage",
+      "/vendor",
+      "/tests",
+      "/coverage",
+      "/scripts/test-package.sh"
     ]
   }
 }

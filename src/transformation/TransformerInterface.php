@@ -14,6 +14,8 @@ interface TransformerInterface
      *
      * @param mixed $value The value to transform
      * @return mixed The transformed value
+     * @throws \tommyknocker\struct\exception\TransformationException For expected invalid input.
+     * Programming errors and unrelated exceptions propagate unchanged.
      */
     public function transform(mixed $value): mixed;
 }

@@ -26,27 +26,16 @@ if [ ! -f "$PROJECT_ROOT/composer.json" ]; then
     exit 1
 fi
 
-# Check if vendor directory exists
-if [ ! -d "$PROJECT_ROOT/vendor" ]; then
-    echo -e "${YELLOW}Warning: vendor directory not found. Running composer install...${NC}"
-    cd "$PROJECT_ROOT"
-    composer install --no-dev --optimize-autoloader
-fi
-
 # Change to project root
 cd "$PROJECT_ROOT"
 
-# Array of example files to test
-EXAMPLES=(
-    "examples/01_basic_api_validation.php"
-    "examples/02_advanced_validation.php"
-    "examples/03_complex_api_structures.php"
-    "examples/04_api_response_formatting.php"
-    "examples/05_field_mapping_aliases.php"
-    "examples/06_union_types_and_transformations.php"
-    "examples/07_factory_pattern.php"
-    "examples/08_strict_mode_and_exceptions.php"
-)
+# Discover every numbered executable example, including new additions.
+shopt -s nullglob
+EXAMPLES=(examples/[0-9][0-9]_*.php)
+if [ ${#EXAMPLES[@]} -eq 0 ]; then
+    echo "No executable examples found" >&2
+    exit 1
+fi
 
 # Counters
 TOTAL_EXAMPLES=${#EXAMPLES[@]}

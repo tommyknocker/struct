@@ -15,6 +15,6 @@ final class User extends Struct
     #[Field(Address::class)]
     public readonly Address $address;
 
-    #[Field(Address::class, isArray: true)]
+    #[Field(Address::class, collection: \tommyknocker\struct\CollectionType::Preserve)]
     public readonly array $previousAddresses;
 }

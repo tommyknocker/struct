@@ -7,56 +7,32 @@ namespace tommyknocker\struct;
 use Attribute;
 use tommyknocker\struct\transformation\TransformerInterface;
 use tommyknocker\struct\validation\ValidationRule;
-use tommyknocker\struct\validation\validators\LegacyValidatorRule;
 
+/** Mapping options; native PHP properties define nullability. */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final class Field
 {
     /**
-     * Constructor
-     * @param string|class-string|array<string> $type e.g. "string", "int", MyClass::class, ["string", "int"]
-     * @param bool $nullable
-     * @param bool $isArray whether this field is an array of given type
-     * @param mixed $default default value if not provided in data (null means no default)
-     * @param string|null $alias alternative key name in input data
-     * @param string|null $validator validator class name (must have static validate method) - DEPRECATED
-     * @param ValidationRule[] $validationRules array of validation rules
-     * @param TransformerInterface[] $transformers array of transformers to apply
+     * @param string|array<string>|null $type Mapping type, or collection element type with collection.
+     * @param ValidationRule[] $validationRules Rules for the complete mapped value.
+     * @param ValidationRule[] $itemRules Rules for each typed collection element.
+     * @param TransformerInterface[] $transformers Input transformations, in declaration order.
      */
     public function __construct(
-        public string|array $type,
-        public bool $nullable = false,
-        public bool $isArray = false,
-        public mixed $default = null,
-        public ?string $alias = null,
-        public ?string $validator = null,
-        public array $validationRules = [],
-        public array $transformers = []
+        public readonly string|array|null $type = null,
+        public readonly ?CollectionType $collection = null,
+        public readonly mixed $default = DefaultValue::Missing,
+        public readonly ?string $alias = null,
+        public readonly array $validationRules = [],
+        public readonly array $transformers = [],
+        public readonly array $itemRules = [],
+        public readonly ?string $outputAlias = null,
+        public readonly bool $required = true
     ) {
     }
 
-    /**
-     * Check if field has a default value
-     */
     public function hasDefault(): bool
     {
-        return $this->default !== null || $this->nullable;
-    }
-
-    /**
-     * Get effective validation rules including legacy validator
-     *
-     * @return ValidationRule[]
-     */
-    public function getEffectiveValidationRules(): array
-    {
-        $rules = $this->validationRules;
-
-        // Support legacy validator for backward compatibility
-        if ($this->validator !== null) {
-            $rules[] = new LegacyValidatorRule($this->validator);
-        }
-
-        return $rules;
+        return $this->default !== DefaultValue::Missing;
     }
 }

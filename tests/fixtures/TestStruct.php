@@ -15,6 +15,6 @@ final class TestStruct extends Struct
     #[Field('string', alias: 'user_name')]
     public readonly string $name;
 
-    #[Field('int', nullable: true)]
+    #[Field('int')]
     public readonly ?int $age;
 }

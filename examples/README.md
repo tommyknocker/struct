@@ -1,457 +1,65 @@
-# Struct Examples
+# Examples: external data in, useful payloads out
 
-This directory contains practical examples of using the Struct library in real-world scenarios, particularly for REST API validation in mobile applications.
+[Documentation](../docs/README.md) · [Rule reference](../docs/validation.md)
 
-## 📁 Examples
-
-### 1. Basic API Validation (`01_basic_api_validation.php`)
-
-**Use Case:** Simple user registration endpoint validation
-
-Demonstrates:
-- ✅ Parsing JSON from mobile app requests
-- ✅ Type validation (string, int, nullable)
-- ✅ Error handling and response formatting
-- ✅ Missing field detection
-- ✅ Type mismatch detection
-
-**Run:**
-```bash
-php examples/01_basic_api_validation.php
-```
-
----
-
-### 2. Advanced Validation (`02_advanced_validation.php`)
-
-**Use Case:** Registration with new validation rules system
-
-Demonstrates:
-- ✅ New validation rules (EmailRule, RangeRule, RequiredRule)
-- ✅ Custom validation rules extending ValidationRule
-- ✅ Specialized exception handling (ValidationException, FieldNotFoundException)
-- ✅ Complex validation logic with detailed error messages
-- ✅ Real-world password and phone validation
-
-**Run:**
-```bash
-php examples/02_advanced_validation.php
-```
-
-**Key Features:**
-- Email validation with built-in EmailRule
-- Phone number validation (10-15 digits)
-- Password strength requirements (uppercase, lowercase, digits)
-- Age validation (13-120 years)
-- Proper exception handling with field context
-
----
-
-### 3. Complex API Structures (`03_complex_api_structures.php`)
-
-**Use Case:** E-commerce order creation with nested objects
-
-Demonstrates:
-- ✅ Nested structs (Address, OrderItem, PaymentInfo)
-- ✅ Arrays of objects (order items)
-- ✅ Enums (OrderStatus, PaymentMethod)
-- ✅ Optional nested objects
-- ✅ Business logic in structs (calculateTotal)
-- ✅ Default values
-
-**Run:**
-```bash
-php examples/03_complex_api_structures.php
-```
-
-**Perfect for:**
-- Shopping cart APIs
-- Multi-step forms
-- Complex data models
-- E-commerce platforms
-
----
-
-### 4. API Response Formatting (`04_api_response_formatting.php`)
-
-**Use Case:** Standardized API responses for mobile apps
-
-Demonstrates:
-- ✅ Consistent response structure
-- ✅ Pagination metadata
-- ✅ Success/error responses
-- ✅ Status codes
-- ✅ Converting structs to JSON
-- ✅ DateTime handling
-
-**Run:**
-```bash
-php examples/04_api_response_formatting.php
-```
-
-**Response Types:**
-- Single resource response
-- Paginated list response
-- Error response
-- Success with metadata
-
----
-
-### 5. Field Mapping and Aliases (`05_field_mapping_aliases.php`)
-
-**Use Case:** Integrating with third-party APIs and legacy systems
-
-Demonstrates:
-- ✅ Snake_case to camelCase mapping
-- ✅ Custom key mapping (e.g., API has `user_id`, you want `userId`)
-- ✅ Handling weird naming conventions (uppercase keys)
-- ✅ Combining aliases with defaults
-- ✅ Working with external APIs
-
-**Run:**
-```bash
-php examples/05_field_mapping_aliases.php
-```
-
-**Perfect for:**
-- Legacy system integration
-- Third-party API wrappers
-- Database model mapping
-- Payment gateway webhooks
-
----
-
-### 6. Union Types and Transformations (`06_union_types_and_transformations.php`)
-
-**Use Case:** Flexible data types and automatic data processing
-
-Demonstrates:
-- ✅ Union types for flexible field types (`string|int`, `string|int|float`)
-- ✅ Data transformations (StringToUpperTransformer, StringToLowerTransformer)
-- ✅ Custom transformers (PhoneFormatterTransformer, NameFormatterTransformer)
-- ✅ Multiple transformations chaining
-- ✅ Combined union types and transformations
-- ✅ JSON serialization with processed data
-
-**Run:**
-```bash
-php examples/06_union_types_and_transformations.php
-```
-
-**Key Features:**
-- Flexible field types accepting multiple types
-- Automatic data formatting and processing
-- Custom transformation logic
-- Chain multiple transformations
-- Preserve transformations in JSON output
-
----
-
-### 7. Factory Pattern (`07_factory_pattern.php`)
-
-**Use Case:** Centralized struct creation with dependency injection
-
-Demonstrates:
-- ✅ Factory pattern for struct creation
-- ✅ PSR-11 container integration
-- ✅ Service layer architecture
-- ✅ Dependency injection
-- ✅ API controller pattern
-- ✅ Complex nested structures
-- ✅ Custom JSON serialization
-
-**Run:**
-```bash
-php examples/07_factory_pattern.php
-```
-
-**Perfect for:**
-- Enterprise applications
-- Microservices architecture
-- Clean architecture patterns
-- Testable and maintainable code
-- Dependency injection frameworks
-
----
-
-### 8. Strict Mode and Exceptions (`08_strict_mode_and_exceptions.php`)
-
-**Use Case:** API security and comprehensive error handling
-
-Demonstrates:
-- ✅ Strict mode for preventing extra fields
-- ✅ Flexible mode for backward compatibility
-- ✅ Specialized exceptions (ValidationException, FieldNotFoundException)
-- ✅ Comprehensive error handling
-- ✅ API security patterns
-- ✅ ArrayAccess with strict mode
-- ✅ JSON serialization with strict mode
-
-**Run:**
-```bash
-php examples/08_strict_mode_and_exceptions.php
-```
-
-**Key Features:**
-- Prevent extra fields for security
-- Detailed error reporting with field context
-- Flexible vs strict validation modes
-- Production-ready error handling
-- API security best practices
-
----
-
-## 🎯 Common Mobile App Scenarios
-
-### User Registration
-See: `01_basic_api_validation.php`, `02_advanced_validation.php`
-
-### User Login
-Similar to registration, validate email/username and password
-
-### Profile Updates
-Use `with()` method to create updated copies
-
-### Shopping Cart / Orders
-See: `03_complex_api_structures.php`
-
-### API Responses
-See: `04_api_response_formatting.php`
-
-### Third-Party Integration
-See: `05_field_mapping_aliases.php`
-
-### Data Processing
-See: `06_union_types_and_transformations.php`
-
-### Enterprise Applications
-See: `07_factory_pattern.php`
-
-### API Security
-See: `08_strict_mode_and_exceptions.php`
-
----
-
-### 9. Attribute Helper Demo (`09_attribute_helper_demo.php`)
-
-**Use Case:** Automatic Field attribute generation
-
-Demonstrates:
-- ✅ Before/after comparison of manual vs automatic attribute generation
-- ✅ Intelligent type inference and validation suggestions
-- ✅ Automatic alias generation for camelCase properties
-- ✅ Smart default value suggestions
-- ✅ Console usage examples
-
-**Run:**
-```bash
-php examples/09_attribute_helper_demo.php
-```
-
-**Key Features:**
-- Reduces boilerplate code by 80%
-- Intelligent suggestions based on property names
-- Automatic field mapping for API integration
-- Consistent attribute patterns across codebase
-
----
-
-### 10. Real-World API Integration (`10_real_world_api_integration.php`)
-
-**Use Case:** E-commerce API integration with automatic attribute generation
-
-Demonstrates:
-- ✅ Batch processing multiple Struct classes
-- ✅ Real-world API response structures
-- ✅ Product, user, and payment request handling
-- ✅ Console commands for production usage
-- ✅ Error handling and validation
-
-**Run:**
-```bash
-php examples/10_real_world_api_integration.php
-```
-
-**Key Features:**
-- Rapid API integration development
-- Consistent data validation across endpoints
-- Automatic field mapping for external APIs
-- Production-ready console commands
-
----
-
-## 🛠️ Attribute Helper Console Tool
-
-The Attribute Helper automatically generates Field attributes for Struct classes:
+Each file is a standalone scenario with input data, application code, checked
+results, and visible output. No web server, database, framework, or network is
+required. Checks throw exceptions on unexpected behavior, even when PHP
+assertions are disabled.
 
 ```bash
-# Generate attributes for a single file
-composer struct-helper src/UserProfile.php
-
-# Generate attributes for entire directory
-composer struct-helper src/
-
-# Dry run (see what would be changed)
-composer struct-helper-dry src/
-
-# Verbose output
-composer struct-helper-verbose src/
+composer install
+php examples/01_receive_api_request.php
+php examples/10_partner_to_fulfillment.php
+composer test-examples
 ```
 
-**Benefits:**
-- ✅ Reduces development time by 60-80%
-- ✅ Ensures consistent attribute patterns
-- ✅ Prevents typos and missing attributes
-- ✅ Intelligent type inference and validation suggestions
+Start with **01** to understand mapping. Read **10** to see an entire integration.
+Use the rest as a cookbook:
 
----
+| Example | Practical task | What it demonstrates |
+| --- | --- | --- |
+| [01 Receive an API request](01_receive_api_request.php) | Validate a registration payload | Inferred types, required fields, explicit optional fields, defaults, strict input |
+| [02 Validation rules](02_validation_rules.php) | Invite a bounded list of corporate recipients | Custom rules, whole-array rules, item rules, nullable rules, indexed errors |
+| [03 Nested payloads](03_nested_payloads.php) | Read an order with an address and keyed order lines | Nested DTOs, typed collections, numeric validation, explicit map output and preservation of keys |
+| [04 Prepare an API response](04_prepare_api_response.php) | Build a public account response from internal storage | Explicit output fields, enums, dates, output aliases, exclusion of application state |
+| [05 Input and output names](05_input_and_output_names.php) | Connect systems with different field names | Independent aliases, symmetric round trips, rejection of ambiguous keys |
+| [06 Transformations and copies](06_transformations_and_copies.php) | Normalize a partner reference and retry an import job | Explicit string-to-int conversion, transformed defaults, `with()` without repeated transformations |
+| [07 Batch import](07_batch_import.php) | Import valid records while reporting bad rows | Generic creation through StructFactory, per-row errors, continuing the batch |
+| [08 Errors at the boundary](08_errors_at_the_boundary.php) | Translate failures into application response data | Malformed JSON, missing fields, unknown fields, nested error paths |
+| [09 Webhooks and dynamic payloads](09_webhooks_and_dynamic_payloads.php) | Forward a typed envelope with a dynamic body | Unions, enum/date conversion, mixed data, preservation of `{}` versus `[]` in JSON and oversized integer precision |
+| [10 Partner to fulfillment](10_partner_to_fulfillment.php) | Turn a partner order into a fulfillment job | Separate input/output DTOs, validation, application calculations, a checked outbound contract |
+| [11 Webhook subscription](11_webhook_subscription.php) | Register an integration callback | UUID version, anchored identifier pattern, HTTPS-only URL, allowed event values, indexed errors and checked copies |
 
-## 🚀 Quick Start
+The examples intentionally separate mapping from application logic. Struct
+validates and converts declared data; code outside the DTO computes totals,
+handles records, and decides which fields the next system receives. When two
+systems exchange the same contract, a single DTO with symmetric names is enough.
 
-All examples are standalone and can be run directly:
+Errors stop at the first problem in one DTO. Batch example 07 collects failures
+across separate records; that is application behavior, not aggregate field
+validation inside Struct. Generic `mixed` bodies retain JSON structure but have
+no schema for their contents; use nested DTOs for data that needs validation.
+
+## Optional scaffolding
+
+Most models only need `#[Field]` plus their PHP types. The CLI can add these
+markers to existing unannotated public readonly properties:
 
 ```bash
-# Run all examples
-for file in examples/*.php; do
-    echo "=== Running $file ==="
-    php "$file"
-    echo ""
-done
+php scripts/struct-helper.php --dry-run path/to/Models.php
+php scripts/struct-helper.php --verbose path/to/models/
+# From a project that installed this package:
+vendor/bin/struct-helper.php --dry-run path/to/Models.php
 ```
 
-Or run individually:
+The CLI parses source without executing it, leaves existing attributes untouched,
+and creates backups unless `--no-backup` is supplied. It resolves namespaces,
+qualified/aliased/grouped imports, parent names, interfaces, and same-file
+inheritance. Unrelated or unresolved parents are left untouched. Ancestors
+outside the processed file and already attributed properties need manual editing.
+Collection element types/shapes and business rules are always explicit.
 
-```bash
-php examples/01_basic_api_validation.php
-php examples/02_advanced_validation.php
-php examples/03_complex_api_structures.php
-php examples/04_api_response_formatting.php
-php examples/05_field_mapping_aliases.php
-php examples/06_union_types_and_transformations.php
-php examples/07_factory_pattern.php
-php examples/08_strict_mode_and_exceptions.php
-```
-
----
-
-## 💡 Tips
-
-1. **Always validate input** - Use Struct for all incoming API data
-2. **Use new validation rules** - Leverage EmailRule, RangeRule, RequiredRule
-3. **Handle exceptions properly** - Use ValidationException and FieldNotFoundException
-4. **Apply transformations** - Use transformers for data processing
-5. **Use union types** - For flexible field types
-6. **Enable strict mode** - For API security when needed
-7. **Use factory pattern** - For enterprise applications
-8. **Keep structs readonly** - Ensures immutability and thread-safety
-9. **Use aliases** - Map external APIs to your naming conventions
-10. **Leverage enums** - For fixed sets of values (status, types, etc.)
-
----
-
-## 🔧 Integration with Frameworks
-
-### Laravel
-
-```php
-// In your controller
-public function register(Request $request)
-{
-    try {
-        $dto = RegisterUserRequest::fromJson($request->getContent());
-        
-        // Create user from validated data
-        $user = User::create([
-            'username' => $dto->username,
-            'email' => $dto->email,
-            'password' => Hash::make($dto->password),
-        ]);
-        
-        return response()->json(['success' => true, 'data' => $user]);
-    } catch (ValidationException $e) {
-        return response()->json([
-            'success' => false, 
-            'error' => $e->getMessage(),
-            'field' => $e->fieldName
-        ], 422);
-    } catch (FieldNotFoundException $e) {
-        return response()->json([
-            'success' => false, 
-            'error' => 'Missing required field: ' . $e->fieldName
-        ], 400);
-    }
-}
-```
-
-### Symfony
-
-```php
-// In your controller
-#[Route('/api/register', methods: ['POST'])]
-public function register(Request $request): JsonResponse
-{
-    try {
-        $dto = RegisterUserRequest::fromJson($request->getContent());
-        
-        // Process registration
-        // ...
-        
-        return $this->json(['success' => true]);
-    } catch (ValidationException $e) {
-        return $this->json([
-            'success' => false, 
-            'error' => $e->getMessage(),
-            'field' => $e->fieldName
-        ], 422);
-    } catch (FieldNotFoundException $e) {
-        return $this->json([
-            'success' => false, 
-            'error' => 'Missing required field: ' . $e->fieldName
-        ], 400);
-    }
-}
-```
-
-### Slim
-
-```php
-$app->post('/api/register', function (Request $request, Response $response) {
-    try {
-        $dto = RegisterUserRequest::fromJson($request->getBody()->getContents());
-        
-        // Process registration
-        // ...
-        
-        $response->getBody()->write(json_encode(['success' => true]));
-        return $response->withHeader('Content-Type', 'application/json');
-    } catch (ValidationException $e) {
-        $response->getBody()->write(json_encode([
-            'success' => false, 
-            'error' => $e->getMessage(),
-            'field' => $e->fieldName
-        ]));
-        return $response->withStatus(422)->withHeader('Content-Type', 'application/json');
-    } catch (FieldNotFoundException $e) {
-        $response->getBody()->write(json_encode([
-            'success' => false, 
-            'error' => 'Missing required field: ' . $e->fieldName
-        ]));
-        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
-    }
-});
-```
-
----
-
-## 📚 Additional Resources
-
-- [Main Documentation](../README.md)
-- [PHPStan Configuration](../phpstan.neon)
-- [Test Cases](../tests/)
-
----
-
-## 🐛 Found an Issue?
-
-If you find any issues with the examples or have suggestions for new examples, please open an issue on GitHub.
-
+The reflection-based AttributeHelper is also available for already loaded
+classes. Generated-code execution belongs in its tests; using Struct does not
+require `eval`, generated model classes, a container, or code generation.

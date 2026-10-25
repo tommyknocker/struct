@@ -20,7 +20,7 @@ final class UserProfile extends Struct
     #[Field('string', alias: 'last_name')]
     public readonly string $lastName;
 
-    #[Field('int', alias: 'age_years', nullable: true)]
+    #[Field('int', alias: 'age_years')]
     public readonly ?int $age;
 }
 
@@ -81,9 +81,9 @@ final class StructFieldAliasTest extends TestCase
         $this->assertSame(35, $profile->age);
     }
 
-    public function testAliasPreferredOverPropertyName(): void
+    public function testSimultaneousAliasAndPropertyNameAreRejected(): void
     {
-        // If both provided, alias should win
+        $this->expectException(\tommyknocker\struct\exception\ValidationException::class);
         $profile = new UserProfile([
             'user_id' => 'from_alias',
             'userId' => 'from_property',
@@ -92,7 +92,6 @@ final class StructFieldAliasTest extends TestCase
             'age_years' => null,
         ]);
 
-        $this->assertSame('from_alias', $profile->userId);
     }
 
     public function testUppercaseAlias(): void

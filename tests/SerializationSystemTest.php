@@ -91,7 +91,7 @@ final class SerializationSystemTest extends TestCase
         $serializer = new JsonSerializer();
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('JSON must decode to an array');
+        $this->expectExceptionMessage('JSON root must be an object');
 
         $serializer->fromJson('"just a string"', TestSerializationStruct::class);
     }

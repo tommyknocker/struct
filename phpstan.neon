@@ -1,16 +1,14 @@
+includes:
+    - extension.neon
+
 parameters:
     level: 9
     paths:
         - src
         - tests
-    excludePaths:
-        - tests/fixtures
+        - examples
     phpVersion: 80100
     ignoreErrors:
-        # Allow new static() in abstract classes - safe for Struct pattern
-        - 
-            message: '#Unsafe usage of new static\(\)#'
-            path: src/Struct.php
         # ArrayAccess can receive any type in runtime despite PHPDoc
         -
             message: '#Call to function is_string\(\) with string will always evaluate to true#'
@@ -18,7 +16,7 @@ parameters:
         # Test classes: Struct properties are initialized by parent constructor
         -
             message: '#has an uninitialized readonly property#'
-            path: tests/
+            path: tests/AttributeHelperTest.php
         # Test code: expressions on separate lines are for testing exceptions
         -
             message: '#on a separate line does not do anything#'

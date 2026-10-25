@@ -54,7 +54,7 @@ final class StructMetadata
         $names = [];
         foreach ($this->fields as $field) {
             $names[] = $field->name;
-            if ($field->alias) {
+            if ($field->alias !== null) {
                 $names[] = $field->alias;
             }
         }

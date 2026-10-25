@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-25
+
+### Breaking changes
+- Replace `isArray` with explicit collection policies: List, Map, or Preserve.
+- Decode oversized JSON integers as exact decimal strings instead of floats.
+- Reject provably incompatible mapping/native types during schema compilation.
+- Nullable no longer implies optional: fields are required unless given a default
+  or `required: false`. Nullability comes from native PHP types.
+- Mapped properties must be public readonly typed instance properties. The
+  constructor and mapping/export methods are final.
+- Remove the PSR-11 container hook and legacy static validators; no external
+  runtime dependencies remain. Custom value objects use explicit transformers.
+- Replace process-global strict mode with a per-DTO `STRICT` constant.
+- Reject simultaneous property/alias input names instead of choosing a winner.
+- Collection `validationRules` validate the entire array; `itemRules` validate
+  elements. Numeric rules accept finite native numbers only.
+- JSON input requires an object root and preserves dynamic object/list identity.
+- `toArray()` exports only Field properties, normalizing dates to strings and enums
+  to scalar values/case names. `jsonSerialize()` returns an object.
+- Defaults and null values now run transformations and validation rules;
+  `default: null` is an explicit default, not an omitted default.
+- Collection keys are preserved instead of reindexed. Conflicting input aliases
+  and duplicate output names are rejected.
+- Native property types are checked without Reflection's implicit scalar coercion;
+  invalid calendar dates are rejected.
+- Attribute Helper no longer guesses aliases, rules, transformations, or defaults.
+  The CLI adds inferred Field markers through static parsing.
+
+### Changed
+- Focus on external payload mapping, validated DTOs, and explicit outbound payloads.
+- Field types and nullability can be inferred from native PHP properties.
+- Default and null values run through the validation pipeline.
+- Collection keys are preserved; nested errors include field paths.
+- `toArray()` exports only Field properties and recursively normalizes dates and enums.
+- Attribute scaffolding is type-only, without guessed business rules or defaults.
+- CLI uses static parsing, supports namespaces, and does not execute target files.
+- Serializer and JSON factory methods delegate to Struct's implementation.
+- Example checks discover all numbered scenarios; remove automatic install/update hooks.
+
+### Added
+- PatternRule, strict OneOfRule, version-aware UuidRule, and scheme-aware UrlRule.
+- A checked webhook subscription example combining format, membership, and item rules.
+- Markdown documentation covering field contracts, collections, validation,
+  transformations, serialization, errors, tooling, and the public API reference.
+- TransformationException gives transformers an explicit input rejection contract,
+  with field paths and previous exceptions retained by the mapper.
+- Namespace-aware static CLI parser handles aliases, grouped imports, interfaces,
+  and same-file inheritance without modifying unrelated Struct classes.
+- Independent `outputAlias` names for outbound payloads, with duplicate-name checks.
+- Explicit null defaults and `required: true` for nullable input presence.
+- Unicode code-point `LengthRule` for string lengths.
+- Integration, regression, generated-code, and CLI tests.
+- Eleven scenario-driven, checked examples covering receiving, validation, nesting,
+  outbound contracts, aliases, transformations/copies, batch import, boundary
+  errors, dynamic webhooks, partner-to-fulfillment integration, and subscriptions.
+- CountRule for collection size and NullableRule for explicit nullable validation.
+- Optional PHPStan property initialization extension, with examples and fixtures
+  included in static analysis.
+- PHP 8.5 in the CI test matrix and isolated distribution installation checks.
+
+### Fixed
+- `with()` transforms only explicit replacements and rejects misspelled keys.
+- Split previously undiscovered test classes into dedicated test files.
+- Mutable date/default data is isolated per construction; mapping depth is bounded.
+- Date JSON round trips and concrete DateTime property mapping.
+- Calendar warnings and incorrect enum backing types produce validation errors.
+- Reflection cannot silently coerce values that disagree with native property types.
+- Union scaffolding generates executable attributes.
+- CLI dry runs avoid side effects; `--no-backup` and failure exit statuses work.
+- Remove unsupported coverage/performance/boilerplate claims from current documentation.
+
 ## [1.2.0] - 2025-10-26
 
 ### Added
@@ -163,7 +234,9 @@ try {
 
 ## Links
 
-- [Unreleased]: https://github.com/tommyknocker/struct/compare/v1.1.0...HEAD
+- [Unreleased]: https://github.com/tommyknocker/struct/compare/v2.0.0...HEAD
+- [2.0.0]: https://github.com/tommyknocker/struct/compare/v1.2.0...v2.0.0
+- [1.2.0]: https://github.com/tommyknocker/struct/compare/v1.1.0...v1.2.0
 - [1.1.0]: https://github.com/tommyknocker/struct/compare/v1.0.0...v1.1.0
 - [1.0.0]: https://github.com/tommyknocker/struct/compare/v0.1.0...v1.0.0
 - [0.1.0]: https://github.com/tommyknocker/struct/compare/v0.0.1...v0.1.0

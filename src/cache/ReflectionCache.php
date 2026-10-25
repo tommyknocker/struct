@@ -26,7 +26,16 @@ final class ReflectionCache
         if (!isset(self::$propertyCache[$className])) {
             /** @var class-string $className */
             $reflection = new ReflectionClass($className);
-            self::$propertyCache[$className] = $reflection->getProperties();
+            $properties = [];
+            do {
+                foreach ($reflection->getProperties() as $property) {
+                    if ($property->getDeclaringClass()->getName() === $reflection->getName()) {
+                        $properties[] = new ReflectionProperty($reflection->getName(), $property->getName());
+                    }
+                }
+                $reflection = $reflection->getParentClass();
+            } while ($reflection !== false);
+            self::$propertyCache[$className] = $properties;
         }
 
         return self::$propertyCache[$className];

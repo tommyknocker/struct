@@ -10,13 +10,14 @@ namespace tommyknocker\struct\exception;
 final class FieldNotFoundException extends StructException
 {
     public function __construct(
-        string $fieldName,
-        ?string $alias = null
+        public readonly string $fieldName,
+        public readonly ?string $alias = null,
+        ?\Throwable $previous = null
     ) {
         $message = "Missing required field: $fieldName";
-        if ($alias) {
+        if ($alias !== null) {
             $message .= " (alias: $alias)";
         }
-        parent::__construct($message);
+        parent::__construct($message, 0, $previous);
     }
 }

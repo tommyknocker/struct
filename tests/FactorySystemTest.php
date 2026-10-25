@@ -60,7 +60,7 @@ final class FactorySystemTest extends TestCase
         $factory = new StructFactory();
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('JSON must decode to an array');
+        $this->expectExceptionMessage('JSON root must be an object');
 
         $factory->createFromJson(TestFactoryStruct::class, '"not an array"');
     }
