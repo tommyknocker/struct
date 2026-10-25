@@ -14,7 +14,10 @@ final class FieldMarker
 
     public function addMarkers(string $source): string
     {
-        $tokens = PhpToken::tokenize($source, TOKEN_PARSE);
+        $tokens = [];
+        foreach (PhpToken::tokenize($source, TOKEN_PARSE) as $token) {
+            $tokens[] = $token;
+        }
         $classes = $this->classes($tokens);
         $parents = [];
         foreach ($classes as $class) {
